@@ -32,7 +32,7 @@ class BleNetworkMessageProcessor {
         }
     }
 
-    fun processSimpleMessage(data: UByteArray){
+    fun processSimpleMessage(data: UByteArray) {
         packet = data
         bytesRemaining = 0
     }

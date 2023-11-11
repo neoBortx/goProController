@@ -8,4 +8,5 @@ data class MediaDirectory(
     @SerialName("d")
     val directory: String,
     @SerialName("fs")
-    val files: List<MediaItem>)
+    val files: List<MediaItem>
+)

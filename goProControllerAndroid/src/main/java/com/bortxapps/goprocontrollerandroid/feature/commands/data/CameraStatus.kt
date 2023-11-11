@@ -1,7 +1,6 @@
 package com.bortxapps.goprocontrollerandroid.feature.commands.data
 
 import android.util.Log
-import arrow.core.left
 import java.nio.ByteBuffer
 
 object CameraStatus {
@@ -18,7 +17,6 @@ object CameraStatus {
                 ex.printStackTrace()
                 Log.e("CameraStatus", "Error decoding key: $it")
             }
-
         }
         return res
     }
@@ -276,11 +274,10 @@ object CameraStatus {
         // 117;Total sd space kb;Total SD card capacity in Kilobyte
         TOTAL_SD_SPACE_KB("117");
 
-        companion object{
+        companion object {
             fun fromValue(value: String): CameraStatusIds = values().first { it.id == value }
         }
     }
-
 
     enum class InternalBatteryLevel(val id: String) {
         ZERO("0"),
@@ -301,7 +298,6 @@ object CameraStatus {
             }
         }
     }
-
 
     enum class PairingState(val value: String) {
         NEVER_PAIRED("0"),
@@ -325,7 +321,6 @@ object CameraStatus {
         }
     }
 
-
     enum class LastTypePairing(val value: String) {
         NEVER_PAIRED("0"),
         PAIRING_APP("1"),
@@ -345,7 +340,6 @@ object CameraStatus {
             }
         }
     }
-
 
     enum class CurrentScanState(val value: String) {
         NEVER_STARTED("0"),
@@ -369,7 +363,6 @@ object CameraStatus {
         }
     }
 
-
     enum class WiFiAPProvisioningState(val value: String) {
 
         NEVER_STARTED("0"),
@@ -392,7 +385,6 @@ object CameraStatus {
             }
         }
     }
-
 
     enum class PrimaryStorageStatus(val value: String) {
         UNKNOWN("-1"),
@@ -419,7 +411,6 @@ object CameraStatus {
             }
         }
     }
-
 
     enum class OTAUpdateStatus(val value: String) {
         IDLE("0"),
@@ -455,7 +446,6 @@ object CameraStatus {
         }
     }
 
-
     enum class LiveViewExposureSelectMode(val value: String) {
         DISABLED("0"),
         AUTO("1"),
@@ -476,7 +466,6 @@ object CameraStatus {
         }
     }
 
-
     enum class MicrophoneAccessoryStatus(val value: String) {
         NOT_CONNECTED("0"),
         CONNECTED("1"),
@@ -495,25 +484,23 @@ object CameraStatus {
         }
     }
 
-
     enum class WirelessBand(val value: String) {
-        _2_4_GHZ("0"),
-        _5_GHZ("1"),
+        BAND_2_4_GHZ("0"),
+        BAND_5_GHZ("1"),
         MAX("2");
 
         companion object {
             @OptIn(ExperimentalUnsignedTypes::class)
             fun fromValue(value: UByteArray): WirelessBand {
                 return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
-                    "0" -> _2_4_GHZ
-                    "1" -> _5_GHZ
+                    "0" -> BAND_2_4_GHZ
+                    "1" -> BAND_5_GHZ
                     "2" -> MAX
                     else -> throw IllegalArgumentException("Invalid value for WirelessBand: $value")
                 }
             }
         }
     }
-
 
     enum class CameraRotationalOrientation(val value: String) {
         // 0: 0 degrees (upright)
@@ -542,7 +529,6 @@ object CameraStatus {
         }
     }
 
-
     enum class MediaModState(val value: String) {
         // 0: Media mod microphone removed
         MICROPHONE_REMOVED("0"),
@@ -566,7 +552,6 @@ object CameraStatus {
             }
         }
     }
-
 
     enum class TimeWarpSpeed(val value: String) {
         SPEED_15X("0"),
@@ -606,7 +591,6 @@ object CameraStatus {
         }
     }
 
-
     enum class CameraLensType(val value: String) {
         DEFAULT("0"),
         MAX_LENS("1"),
@@ -624,7 +608,6 @@ object CameraStatus {
             }
         }
     }
-
 
     enum class MediaModeStatus(val value: String) {
         SELFIE_MODE_0_HDMI_0_MEDIA_MOD_FALSE("0"),
@@ -654,7 +637,6 @@ object CameraStatus {
         }
     }
 
-
     enum class CameraControlStatus(val value: String) {
         CAMERA_IDLE("0"),
         CAMERA_CONTROL("1"),
@@ -672,7 +654,6 @@ object CameraStatus {
             }
         }
     }
-
 
     enum class CameraControlOverUSBState(val value: String) {
         DISABLED("0"),
@@ -702,7 +683,6 @@ object CameraStatus {
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun getValueBoolean(value: UByteArray?): Boolean = ByteBuffer.wrap(value!!.toByteArray())[0].toInt() == 1
-
 
     @OptIn(ExperimentalUnsignedTypes::class)
     val cameraStatusEnumConversionMap = mapOf(
@@ -790,6 +770,4 @@ object CameraStatus {
         CameraStatusIds.ALLOW_CONTROL_OVER_USB to CameraControlOverUSBState::fromValue,
         CameraStatusIds.TOTAL_SD_SPACE_KB to ::getValueInt
     )
-
 }
-

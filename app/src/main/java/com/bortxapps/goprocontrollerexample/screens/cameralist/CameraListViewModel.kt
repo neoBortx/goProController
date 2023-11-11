@@ -7,19 +7,22 @@ import androidx.lifecycle.viewModelScope
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProCamera
 import com.bortxapps.goprocontrollerandroid.domain.data.PairedState
 import com.bortxapps.goprocontrollerandroid.exposedapi.GoProController
+import com.bortxapps.goprocontrollerexample.screens.cameralist.intent.CameraListScreenIntent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CameraListViewModel(private val goProController: GoProController) : ViewModel() {
 
@@ -28,7 +31,6 @@ class CameraListViewModel(private val goProController: GoProController) : ViewMo
     private val _state = MutableStateFlow<CameraListScreenState>(CameraListScreenState.Loading(emptyList()))
     val state: StateFlow<CameraListScreenState>
         get() = _state
-
 
     init {
         viewModelScope.launch {
@@ -47,24 +49,28 @@ class CameraListViewModel(private val goProController: GoProController) : ViewMo
         }
     }
 
-    private fun getCamerasNearby() {
-        Log.d("ExampleViewModel", "getCamerasNearby")
-        val nearbyCameras = mutableStateListOf<GoProCamera>()
+    private fun getCamerasNearby() = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            Log.d("ExampleViewModel", "getCamerasNearby")
+            val nearbyCameras = mutableStateListOf<GoProCamera>()
 
+            _state.value = CameraListScreenState.Loading(nearbyCameras)
 
-        _state.value = CameraListScreenState.Loading(nearbyCameras)
+            val paired = goProController.getCamerasPaired().getOrNull() ?: emptyList()
 
-        val paired = goProController.getCamerasPaired()
+            goProController.getNearByCameras().onSuccess {
+                it.onStart { _state.update { CameraListScreenState.Loading(nearbyCameras) } }
+                    .filter { camera -> nearbyCameras.none { nearCamera -> nearCamera.address == camera.address } }
+                    .map { camera -> camera.copy(pairedState = mapToPairedState(camera, paired)) }
+                    .onEach { cam -> _state.update { CameraListScreenState.Loading(nearbyCameras.apply { add(cam) }) } }
+                    .onCompletion { processOnCompletion(nearbyCameras) }
+                    .catch { error -> processError(error) }
+                    .launchIn(viewModelScope)
+            }.onFailure {
+                _state.update { CameraListScreenState.Error }
+            }
 
-
-        goProController.getNearByCameras()
-            .onStart { _state.value = CameraListScreenState.Loading(nearbyCameras) }
-            .filter { camera -> nearbyCameras.none { it.address == camera.address } }
-            .map { camera -> camera.copy(pairedState = mapToPairedState(camera, paired)) }
-            .onEach { camera -> _state.value = CameraListScreenState.Loading(nearbyCameras.apply { add(camera) }) }
-            .onCompletion { processOnCompletion(nearbyCameras) }
-            .catch { error -> processError(error) }
-            .launchIn(viewModelScope)
+        }
     }
 
     private fun mapToPairedState(nearbyCamera: GoProCamera, paired: List<GoProCamera>): PairedState {
@@ -82,12 +88,9 @@ class CameraListViewModel(private val goProController: GoProController) : ViewMo
 
     private fun processOnCompletion(nearbyCameras: List<GoProCamera>) {
         if (nearbyCameras.isEmpty()) {
-            _state.value = CameraListScreenState.EmptyList
+            _state.update { CameraListScreenState.EmptyList }
         } else {
-            _state.value = CameraListScreenState.Finished(nearbyCameras)
+            _state.update { CameraListScreenState.Finished(nearbyCameras) }
         }
     }
-
-
-    fun checkPermissions() = goProController.checkPermissions()
 }

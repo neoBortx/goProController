@@ -1,31 +1,120 @@
 package com.bortxapps.goprocontrollerandroid.feature.commands
 
+import android.content.Context
 import com.bortxapps.goprocontrollerandroid.domain.contracts.GoProCommands
-import com.bortxapps.goprocontrollerandroid.feature.QUERY_PARAM_SETTING_FRAME_RATE
-import com.bortxapps.goprocontrollerandroid.feature.QUER_PARAM_SETTINGS_RESOLUTION
-import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBase
+import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBaseBle
 import com.bortxapps.goprocontrollerandroid.feature.commands.api.CommandsApi
-import com.bortxapps.goprocontrollerandroid.feature.commands.customSerializers.customCameraStateSerializer
-import java.util.Date
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapFrameRate
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapHyperSmooth
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapResolution
+import com.bortxapps.goprocontrollerandroid.feature.commands.data.CameraStatus
+import com.bortxapps.goprocontrollerandroid.feature.connection.decoder.decodeMessageAsMap
+import com.bortxapps.goprocontrollerandroid.domain.data.FrameRate
+import com.bortxapps.goprocontrollerandroid.domain.data.HyperSmooth
+import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
+import com.bortxapps.goprocontrollerandroid.domain.data.Speed
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapPresets
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapSpeed
 
-class GoProCommandsImpl(private val api: CommandsApi = CommandsApi()) : RepositoryBase(), GoProCommands {
-    override suspend fun getCameraState() = launchRequest<Map<String, String>, Map<String, String>>(
-        customSerializer = { customCameraStateSerializer(it) },
-        request = { api.getCameraState() }
+class GoProCommandsImpl(
+    context: Context,
+    private val api: CommandsApi = CommandsApi()
+) : RepositoryBaseBle(context), GoProCommands {
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override suspend fun getWifiApSSID() = launchReadRequest(
+        request = { api.getWifiApSSID() },
+        customMapper = { String(it.data.toByteArray(), Charsets.UTF_8) }
     )
 
-    override suspend fun setDigitalZoom(zoom: Int) = launchRequest<String, String>(request = { api.setDigitalZoom(zoom) })
-    override suspend fun getDateTime() = launchRequest<String, String>(request = { api.getDateTime() })
-    override suspend fun setDateTime(date: Date) = launchRequest<String, String>(request = { api.setDateTime(date) })
-    override suspend fun getKeepAlive() = launchRequest<String, String>(request = { api.getKeepAlive() })
-    override suspend fun startCameraStream() = launchRequest<String, String>(request = { api.startCameraStream() })
-    override suspend fun stopCameraStream() = launchRequest<String, String>(request = { api.stopCameraStream() })
-    override suspend fun startShutterStream() = launchRequest<String, String>(request = { api.startShutterStream() })
-    override suspend fun stopShutterStream() = launchRequest<String, String>(request = { api.stopShutterStream() })
-    override suspend fun getCameraPresets() = launchRequest<String, String>(request = { api.getCameraPresets() })
-    override suspend fun setCameraVideoPresets() = launchRequest<String, String>(request = { api.setCameraVideoPresets() })
-    override suspend fun setCameraPhotoPresets() = launchRequest<String, String>(request = { api.setCameraPhotoPresets() })
-    override suspend fun setCameraTimeLapsePresets() = launchRequest<String, String>(request = { api.setCameraTimeLapsePresets() })
-    override suspend fun setFrameRate(frameRate: QUERY_PARAM_SETTING_FRAME_RATE) = launchRequest<String, String>(request = { api.setFrameRate(frameRate) })
-    override suspend fun setResolution(res: QUER_PARAM_SETTINGS_RESOLUTION) = launchRequest<String, String>(request = { api.setResolution(res) })
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override suspend fun getWifiApPassword() = launchReadRequest(
+        request = { api.getWifiApPassword() },
+        customMapper = { it.data.contentToString() }
+    )
 
+    override suspend fun enableWifiAp() = launchSimpleWriteRequest(
+        request = { api.enableWifiAp() },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun disableWifiAp() = launchSimpleWriteRequest(
+        request = { api.disableWifiAp() },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override suspend fun getOpenGoProVersion() = launchComplexWriteRequest(
+        request = { api.getOpenGoProVersion() },
+        customMapper = { "${it.data[0].toInt()}.${it.data[1].toInt()}" }
+    )
+
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override suspend fun getCameraStatus() = launchComplexWriteRequest(
+        request = { api.getCameraStatus() },
+        customMapper = { CameraStatus.decodeStatus(decodeMessageAsMap(it)) }
+    )
+
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override suspend fun getResolution() = launchComplexWriteRequest(
+        request = { api.getResolution() },
+        customMapper = { mapResolution(it.data.last()) }
+    )
+
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override suspend fun getFrameRate() = launchComplexWriteRequest(
+        request = { api.getFrameRate() },
+        customMapper = { mapFrameRate(it.data.last()) }
+    )
+
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override suspend fun getHyperSmooth() = launchComplexWriteRequest(
+        request = { api.getHyperSmooth() },
+        customMapper = { mapHyperSmooth(it.data.last()) }
+    )
+
+    override suspend fun getSpeed() = launchComplexWriteRequest(
+        request = { api.getSpeed() },
+        customMapper = { mapSpeed(it.data.last()) }
+    )
+
+    @OptIn(ExperimentalUnsignedTypes::class)
+    override suspend fun getPresets() = launchComplexWriteRequest(
+        request = { api.getPresets() },
+        customMapper = { mapPresets(it.data.last()) }
+    )
+
+    override suspend fun setPresetsVideo() = launchSimpleWriteRequest(
+        request = { api.setPresetsVideo() },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun setPresetsPhoto() = launchSimpleWriteRequest(
+        request = { api.setPresetsPhoto() },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun setPresetsTimeLapse() = launchSimpleWriteRequest(
+        request = { api.setPresetsTimeLapse() },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun setResolution(resolution: Resolution) = launchSimpleWriteRequest(
+        request = { api.setResolution(resolution) },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun setFrameRate(frameRate: FrameRate) = launchSimpleWriteRequest(
+        request = { api.setFrameRate(frameRate) },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun setHyperSmooth(hyperSmooth: HyperSmooth) = launchSimpleWriteRequest(
+        request = { api.setHyperSmooth(hyperSmooth) },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun setSpeed(speed: Speed) = launchSimpleWriteRequest(
+        request = { api.setSpeed(speed) },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+}

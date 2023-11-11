@@ -1,0 +1,17 @@
+package com.bortxapps.goprocontrollerandroid.domain.data
+
+enum class Resolution {
+    RESOLUTION_5_3K,
+    RESOLUTION_4K,
+    RESOLUTION_4K_4_3,
+    RESOLUTION_2_7K,
+    RESOLUTION_2_7K_4_3,
+    RESOLUTION_1440,
+    RESOLUTION_1080,
+    RESOLUTION_2K_GO_PRO_12,
+    RESOLUTION_2K_4_3_GO_PRO_12,
+    RESOLUTION_4K_GOPRO_12,
+    RESOLUTION_4K_4_3_GOPRO_12,
+    RESOLUTION_5K_GOPRO_12,
+    RESOLUTION_1080_GOPRO_12
+}

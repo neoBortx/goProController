@@ -1,6 +1,5 @@
 package com.bortxapps.goprocontrollerandroid.feature.commands.data
 
-
 import java.util.UUID
 
 const val GOPRO_FEA6_UUID = "0000FEA6-0000-1000-8000-00805F9B34FB"

@@ -11,9 +11,8 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.util.Log
 
-
 @OptIn(ExperimentalUnsignedTypes::class)
-private fun bluetoothGattCallback(
+private fun getBluetoothGattCallback(
     onConnected: () -> Unit,
     onDisconnected: () -> Unit,
     onCharacteristicRead: (UByteArray) -> Unit,
@@ -25,12 +24,11 @@ private fun bluetoothGattCallback(
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
-                    Log.d("BleConnectionManager", "onConnectionStateChange: STATE_CONNECTED")
                     onConnected()
                 }
 
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    Log.d("BleConnectionManager", "onConnectionStateChange: STATE_DISCONNECTED")
+                    Log.e("BleConnectionManager", "onConnectionStateChange: STATE_DISCONNECTED")
                     onDisconnected()
                 }
             }
@@ -43,45 +41,44 @@ private fun bluetoothGattCallback(
             status: Int
         ) {
             if (status == GATT_SUCCESS) {
-                Log.d("BleConnectionManager", "onCharacteristicRead: ${characteristic.uuid}} value ${value.toUByteArray()}")
                 onCharacteristicRead(value.toUByteArray())
             } else {
-                Log.d("BleConnectionManager", "onCharacteristicRead: ${characteristic.uuid} FAIL")
+                Log.e("BleConnectionManager", "onCharacteristicRead: ${characteristic.uuid} FAIL")
                 Throwable(status.toString())
             }
         }
 
-        override fun onCharacteristicChanged(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, value: ByteArray) {
-            Log.d(
-                "BleConnectionManager",
-                "onCharacteristicChanged: ${characteristic.uuid}} value ${value.joinToString(separator = ":") { String.format("%02X", it) }}"
-            )
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            value: ByteArray
+        ) {
             onCharacteristicChanged(characteristic, value.toUByteArray())
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             if (status == GATT_SUCCESS) {
-                Log.d("BleConnectionManager", "onServicesDiscovered: ${gatt.services}")
                 onServicesDiscovered()
             } else {
-                Log.d("BleConnectionManager", "onServicesDiscovered: FAIL")
+                Log.e("BleConnectionManager", "onServicesDiscovered: FAIL")
                 Throwable(status.toString())
             }
         }
 
         override fun onDescriptorWrite(gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int) {
             if (status == GATT_SUCCESS) {
-                Log.d("BleConnectionManager", "onDescriptorWrite: ${descriptor?.uuid}")
                 onDescriptorWrite()
             } else {
-                Log.d("BleConnectionManager", "onDescriptorWrite:  FAIL")
+                Log.e("BleConnectionManager", "onDescriptorWrite:  FAIL")
                 Throwable(status.toString())
             }
         }
     }
 
-@OptIn(ExperimentalUnsignedTypes::class)
+
+
 @SuppressLint("MissingPermission")
+@OptIn(ExperimentalUnsignedTypes::class)
 fun connectToGoProBleDevice(
     context: Context,
     device: BluetoothDevice,
@@ -91,15 +88,16 @@ fun connectToGoProBleDevice(
     onCharacteristicChanged: (BluetoothGattCharacteristic?, UByteArray) -> Unit,
     onServicesDiscovered: () -> Unit,
     onDescriptorWrite: () -> Unit
-): BluetoothGatt = device.connectGatt(
-    context,
-    false,
-    bluetoothGattCallback(
-        onConnected,
-        onDisconnected,
-        onCharacteristicRead,
-        onCharacteristicChanged,
-        onServicesDiscovered,
-        onDescriptorWrite
+): BluetoothGatt =
+    device.connectGatt(
+        context,
+        false,
+        getBluetoothGattCallback(
+            onConnected,
+            onDisconnected,
+            onCharacteristicRead,
+            onCharacteristicChanged,
+            onServicesDiscovered,
+            onDescriptorWrite
+        )
     )
-)

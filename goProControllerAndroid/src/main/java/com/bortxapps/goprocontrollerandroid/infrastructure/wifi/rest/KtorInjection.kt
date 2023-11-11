@@ -26,11 +26,13 @@ fun privateGenerateClient() = HttpClient(CIO) {
         requestTimeout = TIME_OUT
     }
 
-    install(ContentNegotiation){
-        json(Json {
-            prettyPrint = true
-            isLenient = true
-        })
+    install(ContentNegotiation) {
+        json(
+            Json {
+                prettyPrint = true
+                isLenient = true
+            }
+        )
     }
 
     install(DefaultRequest) {
@@ -38,9 +40,11 @@ fun privateGenerateClient() = HttpClient(CIO) {
     }
 
     install(ContentNegotiation) {
-        json(Json {
-            prettyPrint = true
-        })
+        json(
+            Json {
+                prettyPrint = true
+            }
+        )
     }
 
     install(Logging) {
@@ -48,9 +52,8 @@ fun privateGenerateClient() = HttpClient(CIO) {
             override fun log(message: String) {
                 Log.v("Logger Ktor =>", message)
             }
-
         }
-        //TODO change to NONE
+        // TODO change to NONE
         level = LogLevel.ALL
     }
 }

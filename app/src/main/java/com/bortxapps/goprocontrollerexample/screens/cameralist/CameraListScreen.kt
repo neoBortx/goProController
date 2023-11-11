@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProCamera
 import com.bortxapps.goprocontrollerandroid.domain.data.PairedState
 import com.bortxapps.goprocontrollerexample.R
+import com.bortxapps.goprocontrollerexample.screens.cameralist.intent.CameraListScreenIntent
 import com.bortxapps.goprocontrollerexample.ui.theme.GoProControllerExampleTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
@@ -53,18 +54,16 @@ import com.google.accompanist.permissions.shouldShowRationale
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraListScreen(
-    viewModel: CameraListViewModel = koinViewModel(), onNavigationToStatus: (String) -> Unit
+    viewModel: CameraListViewModel = koinViewModel(),
+    onNavigationToStatus: (String) -> Unit
 ) {
-
-    Log.d("CameraListScreen", "CameraListScreen")
-
     val state by viewModel.state.collectAsState()
-
     val coroutineScope = rememberCoroutineScope()
 
-    AskForPermissions {
+    AskForPermissions ({
         LaunchedEffect(Unit) {
             viewModel.intentChannel.trySend(CameraListScreenIntent.SearchCameras)
         }
@@ -73,12 +72,18 @@ fun CameraListScreen(
                 viewModel.intentChannel.send(it)
             }
         }
-    }
+    }, {
+        NoPermissionsWindow(it)
+    })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Screen(state: CameraListScreenState, onNavigationToStatus: (String) -> Unit, onSendIntent: (CameraListScreenIntent) -> Unit) {
+private fun Screen(
+    state: CameraListScreenState,
+    onNavigationToStatus: (String) -> Unit,
+    onSendIntent: (CameraListScreenIntent) -> Unit
+) {
     GoProControllerExampleTheme {
         Scaffold(topBar = {
             TopAppBar(
@@ -94,7 +99,7 @@ private fun Screen(state: CameraListScreenState, onNavigationToStatus: (String) 
                     .padding(it)
                     .fillMaxWidth()
                     .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 when (state) {
                     is CameraListScreenState.Error -> {
@@ -130,10 +135,53 @@ private fun Screen(state: CameraListScreenState, onNavigationToStatus: (String) 
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@Composable
+private fun NoPermissionsWindow(permissions: List<PermissionState>) {
+    GoProControllerExampleTheme {
+        Scaffold(topBar = {
+            TopAppBar(
+                title = {
+                    Text("Go Pro Controller Example")
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = colorResource(id = R.color.purple_200))
+            )
+        }) {
+            Column(modifier = Modifier.padding(it)) {
+                val textToShow = if (permissions.any { permissionState -> permissionState.status.shouldShowRationale }) {
+                    "The camera is important for this app. Please grant the permission."
+                } else {
+                    "Camera permission required for this feature to be available. " + "Please grant the permission"
+                }
+                Text(
+                    text = textToShow,
+                    textAlign = TextAlign.Center,
+                    style = typography.headlineSmall,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+                Button(
+                    onClick = {
+                        permissions.forEach { permissionState -> permissionState.launchPermissionRequest() }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Request permission")
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun AskForPermissions(okWindow: @Composable () -> Unit) {
-
+private fun AskForPermissions(okWindow: @Composable () -> Unit, errorWindow: @Composable (permissions: List<PermissionState>) -> Unit) {
     Log.d("CameraListScreen", "AskForPermissions")
 
     val permissions = mutableListOf<PermissionState>()
@@ -141,73 +189,28 @@ private fun AskForPermissions(okWindow: @Composable () -> Unit) {
         // Camera permission state
         permissions.add(
             rememberPermissionState(
-                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_SCAN
             )
         )
         permissions.add(
             rememberPermissionState(
-                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_CONNECT
             )
         )
     } else {
         permissions.add(
             rememberPermissionState(
-                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH
             )
         )
     }
-
-
 
     if (permissions.all { it.status.isGranted }) {
         Log.d("CameraListScreen", "Camera permission Granted")
         okWindow()
     } else {
         Log.d("CameraListScreen", "Camera permission NOT Granted")
-        GoProControllerExampleTheme {
-            Scaffold(topBar = {
-                TopAppBar(
-                    title = {
-                        Text("Go Pro Controller Example")
-                    },
-                    colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = colorResource(id = R.color.purple_200))
-                )
-            }) {
-                Column(modifier = Modifier.padding(it)) {
-                    val textToShow = if (permissions.any { permissionState ->  permissionState.status.shouldShowRationale }) {
-                        // If the user has denied the permission but the rationale can be shown,
-                        // then gently explain why the app requires this permission
-                        "The camera is important for this app. Please grant the permission."
-                    } else {
-                        // If it's the first time the user lands on this feature, or the user
-                        // doesn't want to be asked again for this permission, explain that the
-                        // permission is required
-                        "Camera permission required for this feature to be available. " +
-                                "Please grant the permission"
-                    }
-                    Text(
-                        text = textToShow,
-                        textAlign = TextAlign.Center,
-                        style = typography.headlineSmall,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                    )
-                    Button(
-                        onClick = {
-                            permissions.forEach { permissionState ->  permissionState.launchPermissionRequest() }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        shape = RoundedCornerShape(8.dp),
-                    ) {
-                        Text("Request permission")
-                    }
-                }
-            }
-        }
+        errorWindow(permissions)
     }
 }
 
@@ -255,8 +258,8 @@ private fun CameraList(
                             PairedState.PAIRED_LOCAL -> colorResource(id = R.color.camera_already_connected)
                             PairedState.PAIRED_OTHER -> colorResource(id = R.color.camera_not_available)
                             else -> colorResource(id = R.color.camera_available)
-                        },
-                    ),
+                        }
+                    )
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column {
@@ -294,8 +297,7 @@ private fun CameraList(
                         Button(
                             onClick = { onConnectToDevice(camera.address) },
                             shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier
-                                .padding(8.dp)
+                            modifier = Modifier.padding(8.dp)
                         ) {
                             Text("Connect")
                         }
@@ -313,7 +315,7 @@ private fun Loading(columnScope: ColumnScope) {
             modifier = Modifier
                 .width(75.dp)
                 .height(75.dp)
-                .padding(16.dp),
+                .padding(16.dp)
         )
     }
 }
@@ -344,7 +346,7 @@ private fun ErrorText(columnScope: ColumnScope) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
         )
     }
 }
@@ -359,7 +361,7 @@ private fun EmptyListText(columnScope: ColumnScope) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
         )
     }
 }

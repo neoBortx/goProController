@@ -6,7 +6,9 @@ import com.bortxapps.goprocontrollerandroid.feature.media.api.MediaApi
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaItem
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaItems
 
-class GoProMediaImpl(private val api: MediaApi = MediaApi()) : RepositoryBase(), GoProMedia {
+class GoProMediaImpl(
+    private val api: MediaApi = MediaApi()
+) : RepositoryBase(), GoProMedia {
 
     override suspend fun getMediaList() = launchRequest<MediaItems, MediaItems>(
         request = { api.getMediaList() }

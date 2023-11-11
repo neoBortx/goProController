@@ -1,30 +1,34 @@
 package com.bortxapps.goprocontrollerandroid.feature.base
 
+import android.util.Log
 import arrow.core.Either
-import com.bortxapps.goprocontrollerandroid.domain.GoProError
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 
 abstract class RepositoryBase {
 
+    companion object {
+        const val REST_SUCCESS_CODE = 200
+        const val REST_SUCCESS_FINISH_CODE = 299
+    }
+
+
     suspend inline fun <reified DTO, MAPPED> launchRequest(
         request: () -> HttpResponse,
         noinline customSerializer: ((String) -> DTO)? = null,
-        noinline customMapper: ((DTO) -> MAPPED)? = null,
-    ): Either<GoProError, MAPPED> {
-        try {
-            request().let { response ->
-                return when (response.status.value) {
-                    in 200..299 -> {
-                        processSuccess(response, customSerializer, customMapper)
-                    }
-
-                    else -> Either.Left(GoProError.CAMERA_API_ERROR)
+        noinline customMapper: ((DTO) -> MAPPED)? = null
+    ): Result<MAPPED> {
+        request().let { response ->
+            return when (response.status.value) {
+                in REST_SUCCESS_CODE..REST_SUCCESS_FINISH_CODE -> {
+                    processSuccess(response, customSerializer, customMapper)
                 }
+
+                else -> Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
             }
-        } catch (ex: RepositoryException) {
-            return Either.Left(ex.goProError)
         }
     }
 
@@ -32,12 +36,15 @@ abstract class RepositoryBase {
         response: HttpResponse,
         noinline customSerializer: ((String) -> DTO)?,
         noinline mapper: ((DTO) -> MAPPED)?
-    ): Either.Right<MAPPED> {
+    ): Result<MAPPED> {
         val serialized: DTO = serializeResponse(response, customSerializer)
-        return Either.Right(mapResponse(serialized, mapper))
+        return Result.success(mapResponse(serialized, mapper))
     }
 
-    suspend inline fun <reified DTO> serializeResponse(response: HttpResponse, noinline customSerializer: ((String) -> DTO)? = null): DTO {
+    suspend inline fun <reified DTO> serializeResponse(
+        response: HttpResponse, noinline customSerializer:
+        ((String) -> DTO)? = null
+    ): DTO {
         return try {
             if (customSerializer != null) {
                 customSerializer(response.bodyAsText())
@@ -45,8 +52,8 @@ abstract class RepositoryBase {
                 response.body()
             }
         } catch (ex: Exception) {
-            ex.printStackTrace()
-            throw RepositoryException(GoProError.UNABLE_TO_MAP_DATA)
+            Log.e("BleManager", "serializeResponse ${ex.message} ${ex.stackTrace}")
+            throw GoProException(GoProError.UNABLE_TO_MAP_DATA)
         }
     }
 
@@ -56,15 +63,15 @@ abstract class RepositoryBase {
             try {
                 mapper(response)
             } catch (ex: Exception) {
-                ex.printStackTrace()
-                throw RepositoryException(GoProError.UNABLE_TO_MAP_DATA)
+                Log.e("BleManager", "mapResponse ${ex.message} ${ex.stackTrace}")
+                throw GoProException(GoProError.UNABLE_TO_MAP_DATA)
             }
         } else {
             try {
                 response as MAPPED
             } catch (ex: Exception) {
-                ex.printStackTrace()
-                throw RepositoryException(GoProError.MISSING_DTO_MAPPER)
+                Log.e("BleManager", "mapResponse ${ex.message} ${ex.stackTrace}")
+                throw GoProException(GoProError.MISSING_DTO_MAPPER)
             }
         }
     }

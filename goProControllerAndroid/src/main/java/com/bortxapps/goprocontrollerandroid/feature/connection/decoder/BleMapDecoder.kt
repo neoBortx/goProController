@@ -10,7 +10,6 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-
 @OptIn(ExperimentalUnsignedTypes::class)
 internal fun decodeMessageAsMap(bleNetworkMessage: BleNetworkMessage): Map<UByte, UByteArray> {
     Log.d("BleMapDecoder", "Decoding message: ${bleNetworkMessage.data.toByteArray().joinToString(separator = ":") { String.format("%02X", it) }}")

@@ -1,4 +1,4 @@
-package com.bortxapps.goprocontrollerexample.screens.status
+package com.bortxapps.goprocontrollerexample.screens.cameracontrol.status
 
 sealed class CameraStatusScreenState {
 
@@ -6,5 +6,6 @@ sealed class CameraStatusScreenState {
     object Error : CameraStatusScreenState()
     data class StateRetrieved(
         val cameraApiVersion: String,
-        val map: Map<String, String>) : CameraStatusScreenState()
+        val map: Map<String, String>
+    ) : CameraStatusScreenState()
 }

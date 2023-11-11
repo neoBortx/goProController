@@ -85,32 +85,42 @@ enum class MobileOffloadState {
     PC,
 
     @SerialName("other")
-    OTHER,
+    OTHER
 }
 enum class ContentType {
     @SerialName("0")
     VIDEO,
+
     @SerialName("1")
     LOOPING,
+
     @SerialName("2")
     CHAPTERED_VIDEO,
+
     @SerialName("3")
     TIME_LAPSE,
+
     @SerialName("4")
     SINGLE_PHOTO,
+
     @SerialName("5")
     BURST_PHOTO,
+
     @SerialName("6")
     TIME_LAPSE_PHOTO,
+
     @SerialName("8")
     NIGHT_LAPSE_PHOTO,
+
     @SerialName("9")
     NIGHT_PHOTO,
+
     @SerialName("10")
     CONTINUOUS_PHOTO,
+
     @SerialName("11")
     RAW_PHOTO,
+
     @SerialName("12")
     LIVE_BURST
-
 }

@@ -1,6 +1,5 @@
 package com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
@@ -8,20 +7,17 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothStatusCodes
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import androidx.core.app.ActivityCompat
-import com.bortxapps.goprocontrollerandroid.domain.GoProError
-import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryException
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.BLE_DESCRIPTION_BASE_UUID
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.BleDeviceScanner
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.connectToGoProBleDevice
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.getPairedDevices
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.scanBleDevicesNearby
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.stopSearch
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.getBluetoothAdapter
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -33,78 +29,101 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.util.UUID
 
-
-class BleManager(
+class BleManager private constructor(
     private val bleNetworkMessageProcessor: BleNetworkMessageProcessor = BleNetworkMessageProcessor(),
+    private val bleScanner: BleDeviceScanner = BleDeviceScanner(),
     private val gattMutex: Mutex = Mutex()
 ) {
 
-    private var bluetoothGatt: BluetoothGatt? = null
+    companion object {
+        val instance: BleManager by lazy {
+            BleManager()
+        }
 
-    //completions
+        private const val MUTEX_WAIT: Long = 10000
+    }
+
+    //region completions
     private var onConnectionEstablishedDeferred: CompletableDeferred<Boolean>? = null
     private var onDataReadDeferred: CompletableDeferred<BleNetworkMessage>? = null
     private var onDescriptorWriteDeferred: CompletableDeferred<Boolean>? = null
     private var onDisconnectedDeferred: CompletableDeferred<Boolean>? = null
-
     private var readComplexResponse: Boolean = false
-
     private var detectedDevices: MutableList<BluetoothDevice> = mutableListOf()
+    private var bluetoothGatt: BluetoothGatt? = null
+    //endregion
 
-    internal fun checkPermissions(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) == PackageManager.PERMISSION_GRANTED)
-                    &&
-                    (ActivityCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.BLUETOOTH_SCAN
-                    ) == PackageManager.PERMISSION_GRANTED)
-
-        } else {
-            (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH
-            ) == PackageManager.PERMISSION_GRANTED)
-        }
-    }
-
+    //region public methods
     internal fun getDevicesByService(context: Context, serviceUUID: UUID): Flow<BluetoothDevice> {
         detectedDevices.clear()
-        return scanBleDevicesNearby(context, serviceUUID).onEach {
+        return bleScanner.scanBleDevicesNearby(context, serviceUUID).onEach {
             detectedDevices += it
         }
     }
 
+    @SuppressLint("MissingPermission")
+    internal fun getPairedDevicesByPrefix(context: Context, deviceNamePrefix: String): List<BluetoothDevice> =
+        getBluetoothAdapter(context)?.bondedDevices?.filter {
+            it.name.startsWith(deviceNamePrefix)
+        } ?: emptyList()
 
-    internal fun getPairedDevicesByPrefix(context: Context, deviceNamePrefix: String): List<BluetoothDevice> {
-        try {
-            return getPairedDevices(context).filter { it.name.startsWith(deviceNamePrefix) }
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-            throw RepositoryException(GoProError.MISSING_BLE_PERMISSIONS)
+
+    internal fun stopSearchDevices(context: Context) = bleScanner.stopSearch(context)
+
+    internal suspend fun connectToDevice(context: Context, address: String): Boolean  {
+            return detectedDevices.firstOrNull { it.address == address }?.let {
+                if (connect(context, it)) {
+                    subscribeToNotifications(getNotifiableCharacteristics())
+                    true
+                } else {
+                    false
+                }
+            } ?: false
+        }
+
+    internal suspend fun sendData(
+        serviceUUID: UUID,
+        characteristicUUID: UUID,
+        data: ByteArray,
+        complexResponse: Boolean = false
+    ): BleNetworkMessage {
+        checkGatt()
+        onDataReadDeferred = CompletableDeferred()
+        readComplexResponse = complexResponse
+        return if (writeCharacteristic(
+                bluetoothGatt!!,
+                serviceUUID,
+                characteristicUUID,
+                data
+            )
+        ) {
+            onDataReadDeferred!!.await()
+        } else {
+            Log.e("BleManager", "sendData writeCharacteristic failed")
+            throw GoProException(GoProError.SEND_COMMAND_FAILED)
         }
     }
 
-    internal fun stopSearchDevices(context: Context) = stopSearch(context)
+    internal suspend fun readData(
+        serviceUUID: UUID,
+        characteristicUUID: UUID,
+        complexResponse: Boolean = false
+    ): BleNetworkMessage {
+        checkGatt()
+        return withContext(Dispatchers.IO) {
+            onDataReadDeferred = CompletableDeferred()
+            readComplexResponse = complexResponse
+            readCharacteristic(bluetoothGatt!!, serviceUUID, characteristicUUID)
+            onDataReadDeferred!!.await()
+        }
+    }
+    //endregion
 
-    internal suspend fun connectToDevice(context: Context, address: String): Boolean =
-        detectedDevices.firstOrNull { it.address == address }?.let {
-            if (connect(context, it)) {
-                subscribeToNotifications()
-                true
-            } else {
-                false
-            }
-        } ?: false
-
+    //region private methods
     @OptIn(ExperimentalUnsignedTypes::class)
     private suspend fun connect(context: Context, device: BluetoothDevice): Boolean =
         withContext(Dispatchers.IO) {
             try {
-
                 onConnectionEstablishedDeferred = CompletableDeferred()
                 launchGattOperation {
                     bluetoothGatt = connectToGoProBleDevice(
@@ -115,13 +134,12 @@ class BleManager(
                         onServicesDiscovered = { onConnectionEstablishedDeferred?.complete(true) },
                         onDescriptorWrite = { onDescriptorWriteDeferred?.complete(true) },
                         onCharacteristicRead = { processCharacteristic(it) },
-                        onCharacteristicChanged = { _, value -> processCharacteristic(value) },
+                        onCharacteristicChanged = { _, value -> processCharacteristic(value) }
                     )
                 }
                 return@withContext onConnectionEstablishedDeferred!!.await()
-
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("BleManager", "writeCharacteristic ${e.message} ${e.stackTrace}")
                 return@withContext false
             }
         }
@@ -138,124 +156,101 @@ class BleManager(
         }
     }
 
+
     @SuppressLint("MissingPermission")
     private fun getServices() {
         checkGatt()
         bluetoothGatt!!.discoverServices()
     }
 
-    private suspend fun subscribeToNotifications() {
-        try {
-            checkGatt()
-            bluetoothGatt!!.services
-                ?.map { it.characteristics }
-                ?.flatten()
-                ?.filter { it.properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0 || it.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0 }
-                ?.filter { filterResponseCharacteristic(it) }
-                ?.forEach { characteristic ->
-                    launchGattOperation {
-                        Log.d("BleManager", "subscribeToNotifications setCharacteristicNotification $characteristic")
-                        val descriptorValue = if (characteristic.properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) {
-                            BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
-                        } else {
-                            BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-                        }
-                        writeDescriptor(characteristic, descriptorValue)
-                    }
-                }
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-            throw RepositoryException(GoProError.MISSING_BLE_PERMISSIONS)
-        }
-    }
+    private fun getNotifiableCharacteristics(): List<BluetoothGattCharacteristic> = bluetoothGatt!!.services
+        ?.map { it.characteristics }
+        ?.flatten()
+        ?.filter { filterCharacteristicForSubscriptions(it.properties) }
+        ?.filter { filterResponseCharacteristic(it) } ?: emptyList()
 
-    private fun filterResponseCharacteristic(characteristic: BluetoothGattCharacteristic): Boolean {
-        return characteristic.uuid == GoProUUID.CQ_COMMAND_RSP.uuid
-                || characteristic.uuid == GoProUUID.CQ_SETTING_RSP.uuid
-                || characteristic.uuid == GoProUUID.CQ_QUERY_RSP.uuid
-    }
-
-    internal suspend fun sendData(
-        serviceUUID: UUID,
-        characteristicUUID: UUID,
-        data: ByteArray,
-        complexResponse: Boolean = false
-    ): BleNetworkMessage? {
-        checkGatt()
-        return withContext(Dispatchers.IO) {
-            onDataReadDeferred = CompletableDeferred()
-            readComplexResponse = complexResponse
-            if (writeCharacteristic(
-                    bluetoothGatt!!,
-                    serviceUUID,
-                    characteristicUUID,
-                    data
-                )
-            ) {
-                onDataReadDeferred!!.await()
-            } else {
-                Log.e("BleManager", "sendData writeCharacteristic failed")
-                null
+    private suspend fun subscribeToNotifications(characteristics: List<BluetoothGattCharacteristic>) {
+        characteristics.forEach { characteristic ->
+            launchGattOperation {
+                writeDescriptor(characteristic, getDescriptionValueToSubscribe(characteristic))
             }
         }
     }
 
+    private fun getDescriptionValueToSubscribe(characteristic: BluetoothGattCharacteristic): ByteArray {
+        return if (filterIndicatableCharacteristic(characteristic.properties)) {
+            BluetoothGattDescriptor.ENABLE_INDICATION_VALUE
+        } else {
+            BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+        }
+    }
+
+    private fun filterIndicatableCharacteristic(properties: Int) =
+        properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0
+
+    private fun filterNotifiableCharacteristic(properties: Int) =
+        properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0
+
+    private fun filterCharacteristicForSubscriptions(properties: Int) =
+        filterNotifiableCharacteristic(properties) || filterIndicatableCharacteristic(properties)
+
+
+    private fun filterResponseCharacteristic(characteristic: BluetoothGattCharacteristic): Boolean {
+        return characteristic.uuid == GoProUUID.CQ_COMMAND_RSP.uuid ||
+                characteristic.uuid == GoProUUID.CQ_SETTING_RSP.uuid ||
+                characteristic.uuid == GoProUUID.CQ_QUERY_RSP.uuid
+    }
+
+
+    @SuppressLint("MissingPermission")
     private suspend fun writeCharacteristic(
         bluetoothGatt: BluetoothGatt,
         serviceUUID: UUID,
         characteristicUUID: UUID,
-        value: ByteArray,
+        value: ByteArray
     ): Boolean {
-        return try {
+        try {
             val characteristic = bluetoothGatt.getService(serviceUUID)?.getCharacteristic(characteristicUUID)
             if (characteristic != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    bluetoothGatt.writeCharacteristic(
-                        characteristic,
-                        value,
-                        BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE,
-                    ) == BluetoothStatusCodes.SUCCESS
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    launchGattOperation {
+                        bluetoothGatt.writeCharacteristic(
+                            characteristic,
+                            value,
+                            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
+                        ) == BluetoothStatusCodes.SUCCESS
+                    }
                 } else {
-                    bluetoothGatt.writeCharacteristic(characteristic.apply { this.value = value })
+                    launchGattOperation {
+                        bluetoothGatt.writeCharacteristic(characteristic.apply { this.value = value })
+                    }
                 }
             } else {
                 Log.e("BleManager", "writeCharacteristic characteristic is null")
-                throw RepositoryException(GoProError.SEND_COMMAND_FAILED)
+                throw GoProException(GoProError.SEND_COMMAND_FAILED)
             }
-
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-            throw RepositoryException(GoProError.MISSING_BLE_PERMISSIONS)
         } catch (e: Exception) {
-            e.printStackTrace()
-            throw RepositoryException(GoProError.OTHER)
+
+            throw GoProException(GoProError.OTHER)
         }
     }
 
-    internal suspend fun readData(serviceUUID: UUID, characteristicUUID: UUID, complexResponse: Boolean = false): BleNetworkMessage {
-        checkGatt()
-        return withContext(Dispatchers.IO) {
-            onDataReadDeferred = CompletableDeferred()
-            readComplexResponse = complexResponse
-            readCharacteristic(bluetoothGatt!!, serviceUUID, characteristicUUID)
-            onDataReadDeferred!!.await()
-        }
-    }
-
+    @SuppressLint("MissingPermission")
     private suspend fun readCharacteristic(
         bluetoothGatt: BluetoothGatt,
         serviceUUID: UUID,
-        characteristicUUID: UUID,
+        characteristicUUID: UUID
     ): Boolean {
         try {
-            val characteristic = launchGattOperation { bluetoothGatt.getService(serviceUUID)?.getCharacteristic(characteristicUUID) }
-            return launchGattOperation { bluetoothGatt.readCharacteristic(characteristic) }
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-            throw RepositoryException(GoProError.MISSING_BLE_PERMISSIONS)
+            val characteristic = launchGattOperation {
+                bluetoothGatt.getService(serviceUUID)?.getCharacteristic(characteristicUUID)
+            }
+            return launchGattOperation {
+                bluetoothGatt.readCharacteristic(characteristic)
+            }
         } catch (e: Exception) {
-            e.printStackTrace()
-            throw RepositoryException(GoProError.OTHER)
+            Log.e("BleManager", "readCharacteristic ${e.message} ${e.stackTrace}")
+            throw GoProException(GoProError.OTHER)
         }
     }
 
@@ -278,29 +273,30 @@ class BleManager(
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
-            throw RepositoryException(GoProError.OTHER)
+            throw GoProException(GoProError.OTHER)
         } finally {
             onDescriptorWriteDeferred!!.await()
         }
-
     }
 
     private fun checkGatt() {
         if (bluetoothGatt == null) {
-            throw RepositoryException(GoProError.CAMERA_NOT_CONNECTED)
+            throw GoProException(GoProError.CAMERA_NOT_CONNECTED)
         }
     }
 
     private suspend fun <T> launchGattOperation(operation: suspend () -> T): T {
         return gattMutex.withLock {
             try {
-                withTimeout(10000) {
+                withTimeout(MUTEX_WAIT) {
                     runBlocking { operation() }
                 }
-            } catch (exception: Exception) {
-                exception.printStackTrace()
-                throw RepositoryException(GoProError.OTHER)
+            } catch (e: Exception) {
+                Log.e("BleManager", "launchGattOperation ${e.message} ${e.stackTrace}")
+                throw GoProException(GoProError.OTHER)
             }
         }
     }
+
+    //endregion
 }

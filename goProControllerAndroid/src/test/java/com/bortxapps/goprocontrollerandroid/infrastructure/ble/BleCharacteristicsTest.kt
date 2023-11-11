@@ -12,9 +12,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.util.UUID
 
-
 class BleCharacteristicsTest {
-
 
     //region readCharacteristic
     @Test
@@ -22,7 +20,6 @@ class BleCharacteristicsTest {
         val peripheral: Peripheral = mockk()
         val gattServiceUuid: UUID = UUID.randomUUID()
         val gattCharacteristicUuid: UUID = UUID.randomUUID()
-
 
         coEvery {
             peripheral.read(
@@ -48,7 +45,6 @@ class BleCharacteristicsTest {
         val gattServiceUuid: UUID = UUID.randomUUID()
         val gattCharacteristicUuid: UUID = UUID.randomUUID()
 
-
         coEvery {
             peripheral.read(
                 characteristicOf(
@@ -73,7 +69,6 @@ class BleCharacteristicsTest {
         val gattServiceUuid: UUID = UUID.randomUUID()
         val gattCharacteristicUuid: UUID = UUID.randomUUID()
         val response: ByteArray = byteArrayOf(0x00, 0x01)
-
 
         coEvery {
             peripheral.read(
@@ -107,7 +102,8 @@ class BleCharacteristicsTest {
                 characteristicOf(
                     gattServiceUuid.toString(),
                     gattCharacteristicUuid.toString()
-                ), value
+                ),
+                value
             )
         } throws Exception()
 
@@ -138,7 +134,8 @@ class BleCharacteristicsTest {
                 characteristicOf(
                     gattServiceUuid.toString(),
                     gattCharacteristicUuid.toString()
-                ), value
+                ),
+                value
             )
         } throws NotReadyException()
 
@@ -170,7 +167,8 @@ class BleCharacteristicsTest {
                 characteristicOf(
                     gattServiceUuid.toString(),
                     gattCharacteristicUuid.toString()
-                ), value
+                ),
+                value
             )
         } returns response
 
@@ -189,5 +187,4 @@ class BleCharacteristicsTest {
         }
     }
     //endregion
-
 }

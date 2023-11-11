@@ -6,10 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.bortxapps.goprocontrollerexample.screens.cameracontrol.home.HomeCameraControlScreen
 import com.bortxapps.goprocontrollerexample.screens.cameralist.CameraListScreen
-import com.bortxapps.goprocontrollerexample.screens.media.CameraMediaScreen
-import com.bortxapps.goprocontrollerexample.screens.status.CameraStatusScreen
-
 
 @Composable
 fun GoProNavHost(
@@ -24,18 +22,12 @@ fun GoProNavHost(
     ) {
         composable("cameraList") {
             CameraListScreen(
-                onNavigationToStatus = { navController.navigate("cameraStatus/$it") }
+                onNavigationToStatus = { navController.navigate("cameraHome/$it") }
             )
         }
 
-        composable("cameraStatus/{address}") {
-            CameraStatusScreen(
-            )
-        }
-
-        composable("cameraMedia") {
-            CameraMediaScreen(
-            )
+        composable("cameraHome/{address}") {
+            HomeCameraControlScreen()
         }
     }
 }

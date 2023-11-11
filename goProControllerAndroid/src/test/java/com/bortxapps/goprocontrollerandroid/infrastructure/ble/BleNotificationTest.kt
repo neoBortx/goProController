@@ -50,7 +50,6 @@ class BleNotificationTest {
         val resultBytes = byteArrayOf(0x03, 0x02)
         val characteristics = listOf(characteristic)
 
-
         mockkStatic(::getNotifiableServices)
 
         every { characteristic.serviceUuid } answers { serviceId }
@@ -60,8 +59,6 @@ class BleNotificationTest {
             emit(resultBytes)
         }
         every { getNotifiableServices(peripheral) } returns characteristics
-
-
 
         enableNotifications(peripheral).test {
             val response = awaitItem()

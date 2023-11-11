@@ -1,8 +1,9 @@
 package com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest
 
-import com.bortxapps.goprocontrollerandroid.domain.GoProError
+import android.util.Log
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.GOPRO_BASE_URL
-import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryException
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -31,11 +32,11 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
                 setBody(body)
             }
         } catch (ex: SocketException) {
-            ex.printStackTrace()
-            throw RepositoryException(GoProError.COMMUNICATION_FAILED)
+            Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+            throw GoProException(GoProError.COMMUNICATION_FAILED)
         } catch (ex: Exception) {
-            ex.printStackTrace()
-            throw RepositoryException(GoProError.OTHER)
+            Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+            throw GoProException(GoProError.OTHER)
         }
 
     suspend fun sendRawPostRequest(
@@ -52,13 +53,12 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
             setBody(body)
         }
     } catch (ex: SocketException) {
-        ex.printStackTrace()
-        throw RepositoryException(GoProError.COMMUNICATION_FAILED)
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        throw GoProException(GoProError.COMMUNICATION_FAILED)
     } catch (ex: Exception) {
-        ex.printStackTrace()
-        throw RepositoryException(GoProError.OTHER)
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        throw GoProException(GoProError.OTHER)
     }
-
 
     suspend fun getVideo(
         path: String
@@ -70,11 +70,11 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
             contentType(ContentType.Video.MPEG)
         }
     } catch (ex: SocketException) {
-        ex.printStackTrace()
-        throw RepositoryException(GoProError.COMMUNICATION_FAILED)
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        throw GoProException(GoProError.COMMUNICATION_FAILED)
     } catch (ex: Exception) {
-        ex.printStackTrace()
-        throw RepositoryException(GoProError.OTHER)
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        throw GoProException(GoProError.OTHER)
     }
 
     suspend fun getImage(
@@ -87,11 +87,10 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
             contentType(ContentType.Image.JPEG)
         }
     } catch (ex: SocketException) {
-        ex.printStackTrace()
-        throw RepositoryException(GoProError.COMMUNICATION_FAILED)
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        throw GoProException(GoProError.COMMUNICATION_FAILED)
     } catch (ex: Exception) {
-        ex.printStackTrace()
-        throw RepositoryException(GoProError.OTHER)
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        throw GoProException(GoProError.OTHER)
     }
-
 }

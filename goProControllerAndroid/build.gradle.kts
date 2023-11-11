@@ -43,10 +43,10 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    //BLE
+    // BLE
     implementation(libs.kable)
 
-    //KTOR
+    // KTOR
     implementation(libs.ktor.client)
     implementation(libs.ktor.client.resources)
     implementation(libs.ktor.client.serialization)
@@ -54,12 +54,12 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.kotlinx.serialization)
 
-    //Arrow
+    // Arrow
     implementation(libs.arrow.core)
 
     implementation(libs.kotlinx.coroutines.android)
 
-    //Testing
+    // Testing
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
 }

@@ -25,9 +25,10 @@ class WifiManager {
     }
 
     internal fun connectToWifi(
-        ssid: String, password: String, context: Context,
+        ssid: String,
+        password: String,
+        context: Context
     ): Flow<Boolean> = callbackFlow {
-
         val connectivityManager by lazy { context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
 
         val wifiNetworkSpecifier =
@@ -36,7 +37,6 @@ class WifiManager {
         val networkRequest =
             NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .setNetworkSpecifier(wifiNetworkSpecifier).build()
-
 
         connectivityManager.requestNetwork(
             networkRequest,
@@ -48,7 +48,7 @@ class WifiManager {
 
                 override fun onLost(network: Network) {
                     super.onLost(network)
-                    //Just in case
+                    // Just in case
                     connectivityManager.bindProcessToNetwork(null)
                     connectivityManager.unregisterNetworkCallback(this)
                     trySend(false)
@@ -60,5 +60,4 @@ class WifiManager {
             }
         )
     }
-
 }

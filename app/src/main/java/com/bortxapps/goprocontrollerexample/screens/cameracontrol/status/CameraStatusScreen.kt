@@ -1,4 +1,4 @@
-package com.bortxapps.goprocontrollerexample.screens.commands
+package com.bortxapps.goprocontrollerexample.screens.cameracontrol.status
 
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -34,8 +34,7 @@ import com.bortxapps.goprocontrollerexample.ui.theme.GoProControllerExampleTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CameraCommandsScreen(viewModel: CameraCommandsViewModel = koinViewModel()) {
-
+fun CameraStatusScreen(viewModel: CameraStatusViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsState()
 
     Screen(state)
@@ -43,8 +42,7 @@ fun CameraCommandsScreen(viewModel: CameraCommandsViewModel = koinViewModel()) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Screen(state: CameraCommandsScreenState) {
-
+private fun Screen(state: CameraStatusScreenState) {
     Log.d("CameraStatusScreen", "Screen: $state")
     GoProControllerExampleTheme {
         Scaffold(topBar = {
@@ -58,27 +56,26 @@ private fun Screen(state: CameraCommandsScreenState) {
             Column(modifier = Modifier.padding(paddingValues)) {
                 state.let {
                     when (it) {
-                        is CameraCommandsScreenState.Loading -> Loading()
-                        is CameraCommandsScreenState.Error -> ErrorText(this)
-                        is CameraCommandsScreenState.StateRetrieved -> StateList(it)
+                        is CameraStatusScreenState.Loading -> Loading()
+                        is CameraStatusScreenState.Error -> ErrorText(this)
+                        is CameraStatusScreenState.StateRetrieved -> StateList(it)
                     }
                 }
             }
         }
-
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun StateList(state: CameraCommandsScreenState.StateRetrieved) {
+private fun StateList(state: CameraStatusScreenState.StateRetrieved) {
     Column {
         Text(
             text = "Camera API Version: ${state.cameraApiVersion}",
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         )
         LazyColumn(
             Modifier
@@ -96,17 +93,16 @@ private fun StateList(state: CameraCommandsScreenState.StateRetrieved) {
                             text = key,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = value,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f)
                         )
                     }
                     Divider(thickness = 1.dp, modifier = Modifier.padding(top = 4.dp))
                 }
-
             }
         }
     }
@@ -114,7 +110,6 @@ private fun StateList(state: CameraCommandsScreenState.StateRetrieved) {
 
 @Composable
 private fun Loading() {
-
     Column(
         Modifier
             .fillMaxWidth()
@@ -125,15 +120,16 @@ private fun Loading() {
         CircularProgressIndicator(
             modifier = Modifier
                 .size(64.dp)
-                .padding(16.dp),
+                .padding(16.dp)
         )
         Text(
-            text = "Retrieving data from Go Pro", textAlign = TextAlign.Center, modifier = Modifier
+            text = "Retrieving data from Go Pro",
+            textAlign = TextAlign.Center,
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         )
     }
-
 }
 
 @Composable
@@ -146,7 +142,7 @@ private fun ErrorText(columnScope: ColumnScope) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
         )
     }
 }
