@@ -12,4 +12,6 @@ sealed class CameraCommandsScreenIntent {
     data class ChangeHyperSmooth(val hyperSmooth: HyperSmooth) : CameraCommandsScreenIntent()
     data class ChangeSpeed(val speed: Speed) : CameraCommandsScreenIntent()
     data class ChangePresets(val presets: Presets) : CameraCommandsScreenIntent()
+    object ShutterClicked : CameraCommandsScreenIntent()
+
 }

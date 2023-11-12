@@ -8,5 +8,5 @@ data class MediaItems(
     @SerialName("id")
     val id: String,
     @SerialName("media")
-    val media: List<MediaItem>
+    val media: List<MediaDirectory>
 )

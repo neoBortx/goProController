@@ -59,6 +59,11 @@ enum class GoProBleCommands(val byteArray: ByteArray) {
     SetSpeedSlow4K(byteArrayOf(0x03, 0xB0.toByte(), 0x01, 0x18)),
     SetSpeedSuperSLowMo27k(byteArrayOf(0x03, 0xB0.toByte(), 0x01, 0x19)),
 
+    SetShutterOff(byteArrayOf(0x03, 0x01, 0x01, 0x00)),
+    SetShutterOn(byteArrayOf(0x03, 0x01, 0x01, 0x01)),
+
+
+
     // QUERY SETTINGS
     GetCameraSettings(byteArrayOf(0x01, 0x12)),
     GetResolution(byteArrayOf(0x02, 0x12, 0x02)),

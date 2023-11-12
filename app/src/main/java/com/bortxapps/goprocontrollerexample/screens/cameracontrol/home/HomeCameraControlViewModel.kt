@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class HomeCameraControlViewModel(val goProController: GoProController, val savedStateHandle: SavedStateHandle) : ViewModel() {
+class HomeCameraControlViewModel(val goProController: GoProController, savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private val _state: MutableStateFlow<CameraHomeScreenState> = MutableStateFlow(CameraHomeScreenState.Loading)
     val state: StateFlow<CameraHomeScreenState>
@@ -33,7 +33,7 @@ class HomeCameraControlViewModel(val goProController: GoProController, val saved
                 },
                 {
                     Log.e("ExampleViewModel", "error pairing to : $address")
-                    _state.value = CameraHomeScreenState.Error
+                    _state.value = CameraHomeScreenState.Error(it.message.orEmpty())
                 }
             )
         }

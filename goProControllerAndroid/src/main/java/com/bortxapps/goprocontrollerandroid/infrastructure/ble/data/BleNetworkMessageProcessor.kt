@@ -8,7 +8,6 @@ class BleNetworkMessageProcessor {
 
     private var packet = ubyteArrayOf()
     private var bytesRemaining = 0
-    private var bytesLength = 0
 
     private enum class Mask(val value: UByte) {
         Header(0b01100000U),

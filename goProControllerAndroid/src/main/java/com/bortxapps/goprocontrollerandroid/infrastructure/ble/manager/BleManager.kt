@@ -47,10 +47,10 @@ class BleManager private constructor(
     private var onConnectionEstablishedDeferred: CompletableDeferred<Boolean>? = null
     private var onDataReadDeferred: CompletableDeferred<BleNetworkMessage>? = null
     private var onDescriptorWriteDeferred: CompletableDeferred<Boolean>? = null
-    private var onDisconnectedDeferred: CompletableDeferred<Boolean>? = null
+    private val onDisconnectedDeferred: CompletableDeferred<Boolean>? = null
     private var readComplexResponse: Boolean = false
-    private var detectedDevices: MutableList<BluetoothDevice> = mutableListOf()
-    private var bluetoothGatt: BluetoothGatt? = null
+    private val detectedDevices: MutableList<BluetoothDevice> = mutableListOf()
+    private lateinit var bluetoothGatt: BluetoothGatt
     //endregion
 
     //region public methods
@@ -63,23 +63,22 @@ class BleManager private constructor(
 
     @SuppressLint("MissingPermission")
     internal fun getPairedDevicesByPrefix(context: Context, deviceNamePrefix: String): List<BluetoothDevice> =
-        getBluetoothAdapter(context)?.bondedDevices?.filter {
-            it.name.startsWith(deviceNamePrefix)
-        } ?: emptyList()
-
+        getBluetoothAdapter(context)?.bondedDevices
+            ?.filter { it.name.startsWith(deviceNamePrefix) }
+            .orEmpty()
 
     internal fun stopSearchDevices(context: Context) = bleScanner.stopSearch(context)
 
-    internal suspend fun connectToDevice(context: Context, address: String): Boolean  {
-            return detectedDevices.firstOrNull { it.address == address }?.let {
-                if (connect(context, it)) {
-                    subscribeToNotifications(getNotifiableCharacteristics())
-                    true
-                } else {
-                    false
-                }
-            } ?: false
-        }
+    internal suspend fun connectToDevice(context: Context, address: String): Boolean {
+        return detectedDevices.firstOrNull { it.address == address }?.let {
+            if (connect(context, it)) {
+                subscribeToNotifications(getNotifiableCharacteristics())
+                true
+            } else {
+                false
+            }
+        } ?: false
+    }
 
     internal suspend fun sendData(
         serviceUUID: UUID,
@@ -91,13 +90,13 @@ class BleManager private constructor(
         onDataReadDeferred = CompletableDeferred()
         readComplexResponse = complexResponse
         return if (writeCharacteristic(
-                bluetoothGatt!!,
+                bluetoothGatt,
                 serviceUUID,
                 characteristicUUID,
                 data
             )
         ) {
-            onDataReadDeferred!!.await()
+            onDataReadDeferred?.await() ?: throw GoProException(GoProError.SEND_COMMAND_FAILED)
         } else {
             Log.e("BleManager", "sendData writeCharacteristic failed")
             throw GoProException(GoProError.SEND_COMMAND_FAILED)
@@ -113,8 +112,8 @@ class BleManager private constructor(
         return withContext(Dispatchers.IO) {
             onDataReadDeferred = CompletableDeferred()
             readComplexResponse = complexResponse
-            readCharacteristic(bluetoothGatt!!, serviceUUID, characteristicUUID)
-            onDataReadDeferred!!.await()
+            readCharacteristic(bluetoothGatt, serviceUUID, characteristicUUID)
+            onDataReadDeferred?.await() ?: throw GoProException(GoProError.SEND_COMMAND_FAILED)
         }
     }
     //endregion
@@ -137,9 +136,9 @@ class BleManager private constructor(
                         onCharacteristicChanged = { _, value -> processCharacteristic(value) }
                     )
                 }
-                return@withContext onConnectionEstablishedDeferred!!.await()
+                return@withContext onConnectionEstablishedDeferred?.await() ?: false
             } catch (e: Exception) {
-                Log.e("BleManager", "writeCharacteristic ${e.message} ${e.stackTrace}")
+                Log.e("BleManager", "writeCharacteristic ${e.message} ${e.stackTraceToString()}")
                 return@withContext false
             }
         }
@@ -160,14 +159,15 @@ class BleManager private constructor(
     @SuppressLint("MissingPermission")
     private fun getServices() {
         checkGatt()
-        bluetoothGatt!!.discoverServices()
+        bluetoothGatt.discoverServices()
     }
 
-    private fun getNotifiableCharacteristics(): List<BluetoothGattCharacteristic> = bluetoothGatt!!.services
+    private fun getNotifiableCharacteristics(): List<BluetoothGattCharacteristic> = bluetoothGatt.services
         ?.map { it.characteristics }
         ?.flatten()
         ?.filter { filterCharacteristicForSubscriptions(it.properties) }
-        ?.filter { filterResponseCharacteristic(it) } ?: emptyList()
+        ?.filter { filterResponseCharacteristic(it) }
+        .orEmpty()
 
     private suspend fun subscribeToNotifications(characteristics: List<BluetoothGattCharacteristic>) {
         characteristics.forEach { characteristic ->
@@ -249,7 +249,7 @@ class BleManager private constructor(
                 bluetoothGatt.readCharacteristic(characteristic)
             }
         } catch (e: Exception) {
-            Log.e("BleManager", "readCharacteristic ${e.message} ${e.stackTrace}")
+            Log.e("BleManager", "readCharacteristic ${e.message} ${e.stackTraceToString()}")
             throw GoProException(GoProError.OTHER)
         }
     }
@@ -258,29 +258,29 @@ class BleManager private constructor(
     private suspend fun writeDescriptor(characteristic: BluetoothGattCharacteristic, descriptorValue: ByteArray) {
         onDescriptorWriteDeferred = CompletableDeferred()
         try {
-            bluetoothGatt?.setCharacteristicNotification(characteristic, true)
+            bluetoothGatt.setCharacteristicNotification(characteristic, true)
             characteristic.getDescriptor(UUID.fromString(BLE_DESCRIPTION_BASE_UUID))?.let { descriptor ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    val res = bluetoothGatt!!.writeDescriptor(descriptor, descriptorValue)
+                    val res = bluetoothGatt.writeDescriptor(descriptor, descriptorValue)
                     if (res != BluetoothStatusCodes.SUCCESS) {
                         Log.e("BleManager", "subscribeToNotifications writeDescriptor failed -> $res")
                     } else {
                         Log.d("BleManager", "subscribeToNotifications writeDescriptor success")
                     }
                 } else {
-                    bluetoothGatt!!.writeDescriptor(descriptor.apply { value = descriptorValue })
+                    bluetoothGatt.writeDescriptor(descriptor.apply { value = descriptorValue })
                 }
             }
         } catch (ex: Exception) {
-            ex.printStackTrace()
+            Log.e("BleManager", "writeDescriptor ${ex.message} ${ex.stackTraceToString()}")
             throw GoProException(GoProError.OTHER)
         } finally {
-            onDescriptorWriteDeferred!!.await()
+            onDescriptorWriteDeferred?.await()
         }
     }
 
     private fun checkGatt() {
-        if (bluetoothGatt == null) {
+        if (::bluetoothGatt.isInitialized.not()) {
             throw GoProException(GoProError.CAMERA_NOT_CONNECTED)
         }
     }
@@ -292,7 +292,7 @@ class BleManager private constructor(
                     runBlocking { operation() }
                 }
             } catch (e: Exception) {
-                Log.e("BleManager", "launchGattOperation ${e.message} ${e.stackTrace}")
+                Log.e("BleManager", "launchGattOperation ${e.message} ${e.stackTraceToString()}")
                 throw GoProException(GoProError.OTHER)
             }
         }

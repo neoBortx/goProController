@@ -27,9 +27,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.bortxapps.goprocontrollerexample.R
-import com.bortxapps.goprocontrollerexample.screens.cameracontrol.commands.CameraCommandsScreen
-import com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.CameraMediaScreen
-import com.bortxapps.goprocontrollerexample.screens.cameracontrol.status.CameraStatusScreen
+import com.bortxapps.goprocontrollerexample.screens.cameracontrol.commands.views.CameraCommandsScreen
+import com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.views.CameraMediaScreen
+import com.bortxapps.goprocontrollerexample.screens.cameracontrol.status.views.CameraStatusScreen
 import com.bortxapps.goprocontrollerexample.ui.theme.GoProControllerExampleTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -92,7 +92,7 @@ private fun Screen(state: CameraHomeScreenState) {
             Column {
                 when (state) {
                     is CameraHomeScreenState.Loading -> Loading()
-                    is CameraHomeScreenState.Error -> ErrorText(this)
+                    is CameraHomeScreenState.Error -> ErrorText(this, state.error)
                     is CameraHomeScreenState.Connected -> HomeScreen(selectedTab.value)
                 }
             }
@@ -125,10 +125,20 @@ private fun Loading() {
 }
 
 @Composable
-private fun ErrorText(columnScope: ColumnScope) {
-    columnScope.apply {
+private fun ErrorText(columnScope: ColumnScope, error: String) {
+    columnScope.run {
         Text(
             text = "Something has going wrong",
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+        Text(
+            text = "Error -> $error",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier

@@ -13,7 +13,7 @@ import com.bortxapps.goprocontrollerandroid.feature.media.GoProMediaImpl
 class GoProController(
     private val context: Context,
     private val commands: GoProCommands = GoProCommandsImpl(context),
-    private val media: GoProMedia = GoProMediaImpl(),
+    private val media: GoProMedia = GoProMediaImpl(context),
     private val connector: GoProConnector = GoProConnectorImpl(context)
 ) : GoProMedia by media, GoProCommands by commands, GoProConnector by connector {
 

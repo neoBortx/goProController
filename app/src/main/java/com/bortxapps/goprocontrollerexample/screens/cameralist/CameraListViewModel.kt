@@ -56,7 +56,7 @@ class CameraListViewModel(private val goProController: GoProController) : ViewMo
 
             _state.value = CameraListScreenState.Loading(nearbyCameras)
 
-            val paired = goProController.getCamerasPaired().getOrNull() ?: emptyList()
+            val paired = goProController.getCamerasPaired().getOrNull().orEmpty()
 
             goProController.getNearByCameras().onSuccess {
                 it.onStart { _state.update { CameraListScreenState.Loading(nearbyCameras) } }
@@ -66,8 +66,8 @@ class CameraListViewModel(private val goProController: GoProController) : ViewMo
                     .onCompletion { processOnCompletion(nearbyCameras) }
                     .catch { error -> processError(error) }
                     .launchIn(viewModelScope)
-            }.onFailure {
-                _state.update { CameraListScreenState.Error }
+            }.onFailure { error ->
+                _state.update { CameraListScreenState.Error(error.message ?: "UNKNOWN") }
             }
 
         }
@@ -82,7 +82,7 @@ class CameraListViewModel(private val goProController: GoProController) : ViewMo
     }
 
     private fun processError(error: Throwable) {
-        _state.value = CameraListScreenState.Error
+        _state.value = CameraListScreenState.Error(error.message ?: "UNKNOWN")
         Log.e("ExampleViewModel", "Error -> $error")
     }
 

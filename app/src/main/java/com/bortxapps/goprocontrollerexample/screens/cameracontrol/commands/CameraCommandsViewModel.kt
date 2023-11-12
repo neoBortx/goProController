@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bortxapps.goprocontrollerandroid.exposedapi.GoProController
 import com.bortxapps.goprocontrollerandroid.domain.data.FrameRate
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.domain.data.HyperSmooth
 import com.bortxapps.goprocontrollerandroid.domain.data.Presets
 import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
@@ -37,43 +38,45 @@ class CameraCommandsViewModel(private val goProController: GoProController) : Vi
     }
 
     private fun getInitialData() {
-        Log.d("ExampleViewModel", "getInitialData")
+        Log.d("CameraCommandsViewModel", "getInitialData")
         updateState()
     }
 
     private fun handleIntent(intent: CameraCommandsScreenIntent) {
         when (intent) {
             is CameraCommandsScreenIntent.ChangePresets -> {
-                when (intent.presets) {
-                    Presets.VIDEO -> setCameraVideoPresets()
-                    Presets.PHOTO -> setPhotoPresets()
-                    Presets.TIME_LAPSE -> setTimeLapsePresets()
-                }
+                Log.d("CameraCommandsViewModel", "setPresets")
+                setPresets(intent.presets)
             }
 
             is CameraCommandsScreenIntent.ChangeFrameRate -> {
-                Log.d("ExampleViewModel", "SetVideoFrameRate")
+                Log.d("CameraCommandsViewModel", "SetVideoFrameRate")
                 setVideoFrameRate(intent.frameRate)
             }
 
             is CameraCommandsScreenIntent.ChangeResolution -> {
-                Log.d("ExampleViewModel", "SetResolution")
+                Log.d("CameraCommandsViewModel", "SetResolution")
                 setResolution(intent.resolution)
             }
 
             is CameraCommandsScreenIntent.ChangeHyperSmooth -> {
-                Log.d("ExampleViewModel", "SetHyperSmooth")
+                Log.d("CameraCommandsViewModel", "SetHyperSmooth")
                 setHyperSmooth(intent.hyperSmooth)
             }
 
             is CameraCommandsScreenIntent.ChangeSpeed -> {
-                Log.d("ExampleViewModel", "SetSpeed")
+                Log.d("CameraCommandsViewModel", "SetSpeed")
                 setSpeed(intent.speed)
+            }
+
+            CameraCommandsScreenIntent.ShutterClicked -> {
+                Log.d("CameraCommandsViewModel", "ShutterClicked")
+                pressShutter()
             }
         }
     }
 
-    private fun updateState() {
+    private fun updateState(shutterOn: Boolean = false) {
         viewModelScope.launch {
             withContext(IO) {
                 try {
@@ -88,12 +91,14 @@ class CameraCommandsViewModel(private val goProController: GoProController) : Vi
                             frameRate,
                             hyperSmooth,
                             presets,
-                            speed
+                            speed,
+                            shutterOn
                         )
                     }
+                } catch (ex: GoProException) {
+                    _state.value = CameraCommandsScreenState.Error(error = ex.message)
                 } catch (ex: Exception) {
-                    ex.printStackTrace()
-                    _state.value = CameraCommandsScreenState.Error
+                    _state.value = CameraCommandsScreenState.Error("UNKNOWN")
                 }
             }
         }
@@ -105,36 +110,37 @@ class CameraCommandsViewModel(private val goProController: GoProController) : Vi
         }
     }
 
-    private fun setCameraVideoPresets() = viewModelScope.launch {
+    private fun setPresets(presets: Presets) = viewModelScope.launch {
         withContext(IO) {
-            goProController.setPresetsVideo().fold({
-                updateState()
-            }, {
-                Log.e("ExampleViewModel", "setCameraVideoPresets -> $it")
-                notifyCommandFailed()
-            })
-        }
-    }
+            when (presets) {
+                Presets.VIDEO -> {
+                    goProController.setPresetsVideo().fold({
+                        updateState()
+                    }, {
+                        Log.e("CameraCommandsViewModel", "setCameraVideoPresets -> $it")
+                        notifyCommandFailed()
+                    })
+                }
 
-    private fun setTimeLapsePresets() = viewModelScope.launch {
-        withContext(IO) {
-            goProController.setPresetsTimeLapse().fold({
-                updateState()
-            }, {
-                Log.e("ExampleViewModel", "MutableStateFlow -> $it")
-                notifyCommandFailed()
-            })
-        }
-    }
+                Presets.PHOTO -> {
+                    goProController.setPresetsPhoto().fold({
+                        updateState()
+                    }, {
+                        Log.e("CameraCommandsViewModel", "MutableStateFlow -> $it")
+                        notifyCommandFailed()
+                    })
+                }
 
-    private fun setPhotoPresets() = viewModelScope.launch {
-        withContext(IO) {
-            goProController.setPresetsPhoto().fold({
-                updateState()
-            }, {
-                Log.e("ExampleViewModel", "MutableStateFlow -> $it")
-                notifyCommandFailed()
-            })
+                Presets.TIME_LAPSE -> {
+                    goProController.setPresetsTimeLapse().fold({
+                        updateState()
+                    }, {
+                        Log.e("CameraCommandsViewModel", "MutableStateFlow -> $it")
+                        notifyCommandFailed()
+                    })
+                }
+            }
+
         }
     }
 
@@ -143,7 +149,7 @@ class CameraCommandsViewModel(private val goProController: GoProController) : Vi
             goProController.setFrameRate(frameRate).fold({
                 updateState()
             }, {
-                Log.e("ExampleViewModel", "setVideoFrameRate -> $it")
+                Log.e("CameraCommandsViewModel", "setVideoFrameRate -> $it")
                 notifyCommandFailed()
             })
         }
@@ -154,7 +160,7 @@ class CameraCommandsViewModel(private val goProController: GoProController) : Vi
             goProController.setResolution(res).fold({
                 updateState()
             }, {
-                Log.e("ExampleViewModel", "setResolution -> $it")
+                Log.e("CameraCommandsViewModel", "setResolution -> $it")
                 notifyCommandFailed()
             })
         }
@@ -165,7 +171,7 @@ class CameraCommandsViewModel(private val goProController: GoProController) : Vi
             goProController.setHyperSmooth(hyperSmooth).fold({
                 updateState()
             }, {
-                Log.e("ExampleViewModel", "setHyperSmooth -> $it")
+                Log.e("CameraCommandsViewModel", "setHyperSmooth -> $it")
                 notifyCommandFailed()
             })
         }
@@ -177,7 +183,30 @@ class CameraCommandsViewModel(private val goProController: GoProController) : Vi
             goProController.setSpeed(speed).fold({
                 updateState()
             }, {
-                Log.e("ExampleViewModel", "setSpeed -> $it")
+                Log.e("CameraCommandsViewModel", "setSpeed -> $it")
+                notifyCommandFailed()
+            })
+        }
+    }
+
+    private fun pressShutter() = viewModelScope.launch {
+        withContext(IO) {
+            goProController.setShutterOn().fold({
+                updateState(true)
+                releaseShutter()
+            }, {
+                Log.e("CameraCommandsViewModel", "setShutterOn -> $it")
+                notifyCommandFailed()
+            })
+        }
+    }
+
+    private fun releaseShutter() = viewModelScope.launch {
+        withContext(IO) {
+            goProController.setShutterOff().fold({
+                updateState(false)
+            }, {
+                Log.e("CameraCommandsViewModel", "setShutterOff -> $it")
                 notifyCommandFailed()
             })
         }

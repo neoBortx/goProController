@@ -2,7 +2,7 @@ package com.bortxapps.goprocontrollerandroid.feature.commands
 
 import android.content.Context
 import com.bortxapps.goprocontrollerandroid.domain.contracts.GoProCommands
-import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBaseBle
+import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBleBase
 import com.bortxapps.goprocontrollerandroid.feature.commands.api.CommandsApi
 import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapFrameRate
 import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapHyperSmooth
@@ -19,7 +19,7 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapSp
 class GoProCommandsImpl(
     context: Context,
     private val api: CommandsApi = CommandsApi()
-) : RepositoryBaseBle(context), GoProCommands {
+) : RepositoryBleBase(context), GoProCommands {
     @OptIn(ExperimentalUnsignedTypes::class)
     override suspend fun getWifiApSSID() = launchReadRequest(
         request = { api.getWifiApSSID() },
@@ -29,7 +29,7 @@ class GoProCommandsImpl(
     @OptIn(ExperimentalUnsignedTypes::class)
     override suspend fun getWifiApPassword() = launchReadRequest(
         request = { api.getWifiApPassword() },
-        customMapper = { it.data.contentToString() }
+        customMapper = { String(it.data.toByteArray(), Charsets.UTF_8) }
     )
 
     override suspend fun enableWifiAp() = launchSimpleWriteRequest(
@@ -72,6 +72,7 @@ class GoProCommandsImpl(
         customMapper = { mapHyperSmooth(it.data.last()) }
     )
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     override suspend fun getSpeed() = launchComplexWriteRequest(
         request = { api.getSpeed() },
         customMapper = { mapSpeed(it.data.last()) }
@@ -95,6 +96,16 @@ class GoProCommandsImpl(
 
     override suspend fun setPresetsTimeLapse() = launchSimpleWriteRequest(
         request = { api.setPresetsTimeLapse() },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun setShutterOff() = launchSimpleWriteRequest(
+        request = { api.setShutterOff() },
+        responseValidator = { validateSimpleWriteResponse(it) }
+    )
+
+    override suspend fun setShutterOn() = launchSimpleWriteRequest(
+        request = { api.setShutterOn() },
         responseValidator = { validateSimpleWriteResponse(it) }
     )
 

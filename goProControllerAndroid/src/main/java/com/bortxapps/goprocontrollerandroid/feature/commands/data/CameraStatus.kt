@@ -11,15 +11,17 @@ object CameraStatus {
         map.keys.forEach {
             try {
                 val key: CameraStatusIds = CameraStatusIds.fromValue(it.toString())
-                Log.d("CameraStatus", "Decoding key: $key, value: ${map[it]!!}")
-                res += key.name to cameraStatusEnumConversionMap[key]?.invoke(map[it]!!).toString()
+                map[it]?.let { value ->
+                    Log.d("CameraStatus", "Decoding key: $key, value: $value")
+                    res += key.name to cameraStatusEnumConversionMap[key]?.invoke(value).toString()
+                }
             } catch (ex: Exception) {
-                ex.printStackTrace()
-                Log.e("CameraStatus", "Error decoding key: $it")
+                Log.e("CameraStatus", "Error decoding key: $it -> ${ex.stackTraceToString()}")
             }
         }
         return res
     }
+
     enum class CameraStatusIds(val id: String) {
         // 1;Internal battery present;Is the system’s internal battery present?
         INTERNAL_BATTERY_PRESENT("1"),
@@ -671,18 +673,20 @@ object CameraStatus {
         }
     }
 
+    private const val INTEGER_BYTES_LENGTH = 4
+
     @OptIn(ExperimentalUnsignedTypes::class)
-    private fun getValueInt(value: UByteArray?): Int = if (value!!.size == 4) {
+    private fun getValueInt(value: UByteArray): Int = if (value.size == INTEGER_BYTES_LENGTH) {
         ByteBuffer.wrap(value.toByteArray()).getInt()
     } else {
         ByteBuffer.wrap(value.toByteArray())[0].toInt()
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    private fun getValueString(value: UByteArray?): String = String(value!!.toByteArray(), Charsets.UTF_8)
+    private fun getValueString(value: UByteArray): String = String(value.toByteArray(), Charsets.UTF_8)
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    private fun getValueBoolean(value: UByteArray?): Boolean = ByteBuffer.wrap(value!!.toByteArray())[0].toInt() == 1
+    private fun getValueBoolean(value: UByteArray): Boolean = ByteBuffer.wrap(value.toByteArray())[0].toInt() == 1
 
     @OptIn(ExperimentalUnsignedTypes::class)
     val cameraStatusEnumConversionMap = mapOf(

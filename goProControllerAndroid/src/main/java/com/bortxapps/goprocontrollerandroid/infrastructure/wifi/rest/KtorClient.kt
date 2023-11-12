@@ -32,10 +32,10 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
                 setBody(body)
             }
         } catch (ex: SocketException) {
-            Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+            Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
             throw GoProException(GoProError.COMMUNICATION_FAILED)
         } catch (ex: Exception) {
-            Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+            Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
             throw GoProException(GoProError.OTHER)
         }
 
@@ -53,10 +53,10 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
             setBody(body)
         }
     } catch (ex: SocketException) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
         throw GoProException(GoProError.COMMUNICATION_FAILED)
     } catch (ex: Exception) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
         throw GoProException(GoProError.OTHER)
     }
 
@@ -70,10 +70,10 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
             contentType(ContentType.Video.MPEG)
         }
     } catch (ex: SocketException) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
         throw GoProException(GoProError.COMMUNICATION_FAILED)
     } catch (ex: Exception) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
         throw GoProException(GoProError.OTHER)
     }
 
@@ -87,10 +87,10 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
             contentType(ContentType.Image.JPEG)
         }
     } catch (ex: SocketException) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
         throw GoProException(GoProError.COMMUNICATION_FAILED)
     } catch (ex: Exception) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTrace}")
+        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
         throw GoProException(GoProError.OTHER)
     }
 }

@@ -1,5 +1,0 @@
-complexity:
-  TooManyFunctions:
-    thresholdInFiles: 20
-  LongParameterList:
-    allowedFunctionParameters: 10

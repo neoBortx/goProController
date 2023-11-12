@@ -1,13 +1,11 @@
 package com.bortxapps.goprocontrollerandroid.feature.connection
 
 import android.content.Context
-import android.util.Log
-import arrow.core.continuations.result
 import com.bortxapps.goprocontrollerandroid.domain.contracts.GoProConnector
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProCamera
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
-import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBaseBle
+import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBleBase
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GOPRO_NAME_PREFIX
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.feature.connection.api.ConnectionApi
@@ -19,7 +17,7 @@ import kotlinx.coroutines.flow.map
 class GoProConnectorImpl(
     context: Context,
     private val api: ConnectionApi = ConnectionApi()
-) : RepositoryBaseBle(context), GoProConnector {
+) : RepositoryBleBase(context), GoProConnector {
 
     override suspend fun getNearByCameras(): Result<Flow<GoProCamera>> =
         launchBleOperationWithValidations(context) {

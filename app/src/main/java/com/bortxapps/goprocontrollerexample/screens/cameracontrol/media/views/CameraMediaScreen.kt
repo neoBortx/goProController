@@ -1,4 +1,4 @@
-package com.bortxapps.goprocontrollerexample.screens.cameracontrol.status
+package com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.views
 
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -30,19 +30,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.bortxapps.goprocontrollerexample.R
+import com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.CameraMediaScreenState
+import com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.CameraMediaViewModel
 import com.bortxapps.goprocontrollerexample.ui.theme.GoProControllerExampleTheme
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun CameraStatusScreen(viewModel: CameraStatusViewModel = koinViewModel()) {
+fun CameraMediaScreen(viewModel: CameraMediaViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsState()
-
     Screen(state)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Screen(state: CameraStatusScreenState) {
+private fun Screen(state: CameraMediaScreenState) {
     Log.d("CameraStatusScreen", "Screen: $state")
     GoProControllerExampleTheme {
         Scaffold(topBar = {
@@ -56,9 +57,9 @@ private fun Screen(state: CameraStatusScreenState) {
             Column(modifier = Modifier.padding(paddingValues)) {
                 state.let {
                     when (it) {
-                        is CameraStatusScreenState.Loading -> Loading()
-                        is CameraStatusScreenState.Error -> ErrorText(this)
-                        is CameraStatusScreenState.StateRetrieved -> StateList(it)
+                        is CameraMediaScreenState.Loading -> Loading()
+                        is CameraMediaScreenState.Error -> ErrorText(this)
+                        is CameraMediaScreenState.MediaList -> StateList(it)
                     }
                 }
             }
@@ -68,10 +69,10 @@ private fun Screen(state: CameraStatusScreenState) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun StateList(state: CameraStatusScreenState.StateRetrieved) {
+private fun StateList(state: CameraMediaScreenState.MediaList) {
     Column {
         Text(
-            text = "Camera API Version: ${state.cameraApiVersion}",
+            text = "Media content",
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
                 .fillMaxWidth()
@@ -82,7 +83,7 @@ private fun StateList(state: CameraStatusScreenState.StateRetrieved) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            items(state.map.toList(), key = { state -> state.first }) { (key, value) ->
+            items(items = state.items.media[0].files) { item ->
                 Column(Modifier.padding(vertical = 4.dp)) {
                     Row(
                         modifier = Modifier
@@ -90,13 +91,13 @@ private fun StateList(state: CameraStatusScreenState.StateRetrieved) {
                             .wrapContentHeight()
                     ) {
                         Text(
-                            text = key,
+                            text = item.fileName,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = value,
+                            text = item.groupType.toString(),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
                         )
@@ -134,7 +135,7 @@ private fun Loading() {
 
 @Composable
 private fun ErrorText(columnScope: ColumnScope) {
-    columnScope.apply {
+    columnScope.run {
         Text(
             text = "Something has going wrong",
             textAlign = TextAlign.Center,

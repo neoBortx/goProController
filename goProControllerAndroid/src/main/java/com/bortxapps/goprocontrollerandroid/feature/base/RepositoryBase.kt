@@ -15,20 +15,26 @@ abstract class RepositoryBase {
         const val REST_SUCCESS_FINISH_CODE = 299
     }
 
-
     suspend inline fun <reified DTO, MAPPED> launchRequest(
         request: () -> HttpResponse,
         noinline customSerializer: ((String) -> DTO)? = null,
         noinline customMapper: ((DTO) -> MAPPED)? = null
     ): Result<MAPPED> {
-        request().let { response ->
-            return when (response.status.value) {
-                in REST_SUCCESS_CODE..REST_SUCCESS_FINISH_CODE -> {
-                    processSuccess(response, customSerializer, customMapper)
-                }
+        return try {
+            request().let { response ->
+                return when (response.status.value) {
+                    in REST_SUCCESS_CODE..REST_SUCCESS_FINISH_CODE -> {
+                        processSuccess(response, customSerializer, customMapper)
+                    }
 
-                else -> Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
+                    else -> Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
+                }
             }
+        } catch (ex: GoProException) {
+             Result.failure(ex)
+        } catch (ex: Exception) {
+            Log.e("RepositoryBase", "launchRequest ${ex.message} ${ex.stackTraceToString()}")
+            Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
         }
     }
 
@@ -52,8 +58,8 @@ abstract class RepositoryBase {
                 response.body()
             }
         } catch (ex: Exception) {
-            Log.e("BleManager", "serializeResponse ${ex.message} ${ex.stackTrace}")
-            throw GoProException(GoProError.UNABLE_TO_MAP_DATA)
+            Log.e("RepositoryBase", "serializeResponse ${ex.message} ${ex.stackTraceToString()}")
+            throw GoProException(GoProError.UNKNOWN_RECEIVED_DATA)
         }
     }
 
@@ -63,14 +69,14 @@ abstract class RepositoryBase {
             try {
                 mapper(response)
             } catch (ex: Exception) {
-                Log.e("BleManager", "mapResponse ${ex.message} ${ex.stackTrace}")
+                Log.e("RepositoryBase", "mapResponse ${ex.message} ${ex.stackTraceToString()}")
                 throw GoProException(GoProError.UNABLE_TO_MAP_DATA)
             }
         } else {
             try {
                 response as MAPPED
             } catch (ex: Exception) {
-                Log.e("BleManager", "mapResponse ${ex.message} ${ex.stackTrace}")
+                Log.e("RepositoryBase", "mapResponse ${ex.message} ${ex.stackTraceToString()}")
                 throw GoProException(GoProError.MISSING_DTO_MAPPER)
             }
         }

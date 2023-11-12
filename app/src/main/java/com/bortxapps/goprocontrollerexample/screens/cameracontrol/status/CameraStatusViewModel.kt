@@ -19,32 +19,33 @@ class CameraStatusViewModel(private val goProController: GoProController) : View
         get() = _state
 
     init {
-        getCameraState()
+        viewModelScope.launch {
+            withContext(IO) {
+                getCameraApiVersion()
+                getCameraState()
+            }
+        }
     }
 
-    private fun getCameraApiVersion() = viewModelScope.launch {
+    private suspend fun getCameraApiVersion() {
         Log.d("ExampleViewModel", "getCameraApiVersion")
-        withContext(IO) {
-            goProController.getOpenGoProVersion().fold({
-                stateRetrieved = stateRetrieved.copy(cameraApiVersion = it)
-                _state.value = stateRetrieved
-            }, {
-                Log.e("ExampleViewModel", "getCameraApiVersion Error -> $it")
-                _state.value = CameraStatusScreenState.Error
-            })
-        }
+        goProController.getOpenGoProVersion().fold({
+            stateRetrieved = stateRetrieved.copy(cameraApiVersion = it)
+            _state.value = stateRetrieved
+        }, {
+            Log.e("ExampleViewModel", "getCameraApiVersion Error -> $it")
+            _state.value = CameraStatusScreenState.Error(it.message.orEmpty())
+        })
     }
 
-    private fun getCameraState() = viewModelScope.launch {
+    private suspend fun getCameraState() {
         Log.d("ExampleViewModel", "getCameraState")
-        withContext(IO) {
-            goProController.getCameraStatus().fold({
-                stateRetrieved = stateRetrieved.copy(map = it)
-                _state.value = stateRetrieved
-            }, {
-                Log.e("ExampleViewModel", "getCameraState Error -> $it")
-                _state.value = CameraStatusScreenState.Error
-            })
-        }
+        goProController.getCameraStatus().fold({
+            stateRetrieved = stateRetrieved.copy(map = it)
+            _state.value = stateRetrieved
+        }, {
+            Log.e("ExampleViewModel", "getCameraState Error -> $it")
+            _state.value = CameraStatusScreenState.Error(it.message.orEmpty())
+        })
     }
 }

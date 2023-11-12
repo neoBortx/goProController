@@ -3,6 +3,7 @@ package com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
+import android.util.Log
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 
@@ -40,8 +41,10 @@ suspend fun <T> launchBleOperationWithValidations(context: Context, action: susp
         checkPermissions(context)
         action()
     } catch (ex: GoProException) {
+        Log.e("RepositoryBaseBle", "launchBleOperationWithValidations error -> $ex - ${ex.stackTraceToString()}")
         Result.failure(ex)
     } catch (ex: Exception) {
+        Log.e("RepositoryBaseBle", "launchBleOperationWithValidations error -> $ex - ${ex.stackTraceToString()}")
         Result.failure(GoProException(GoProError.OTHER))
     }
 }

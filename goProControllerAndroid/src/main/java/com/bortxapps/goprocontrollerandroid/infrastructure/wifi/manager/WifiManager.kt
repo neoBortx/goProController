@@ -9,8 +9,14 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSpecifier
 import android.provider.Settings
+import android.util.Log
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
 
 class WifiManager {
 
@@ -28,7 +34,7 @@ class WifiManager {
         ssid: String,
         password: String,
         context: Context
-    ): Flow<Boolean> = callbackFlow {
+    ): Flow<Result<WifiStatus>> = callbackFlow {
         val connectivityManager by lazy { context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
 
         val wifiNetworkSpecifier =
@@ -38,26 +44,49 @@ class WifiManager {
             NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .setNetworkSpecifier(wifiNetworkSpecifier).build()
 
-        connectivityManager.requestNetwork(
-            networkRequest,
-            object : ConnectivityManager.NetworkCallback() {
-                override fun onAvailable(network: Network) {
-                    connectivityManager.bindProcessToNetwork(network)
-                    trySend(true)
-                }
+        trySend(Result.success(WifiStatus.CONNECTING))
 
-                override fun onLost(network: Network) {
-                    super.onLost(network)
-                    // Just in case
-                    connectivityManager.bindProcessToNetwork(null)
-                    connectivityManager.unregisterNetworkCallback(this)
-                    trySend(false)
-                }
+        Log.d("WifiManager", "connectToWifi connecting $ssid $password")
 
-                override fun onUnavailable() {
-                    trySend(false)
+        try {
+            connectivityManager.requestNetwork(
+                networkRequest,
+                object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        super.onAvailable(network)
+                        Log.d("WifiManager", "connectToWifi onAvailable")
+                        connectivityManager.bindProcessToNetwork(network)
+                        trySend(Result.success(WifiStatus.CONNECTED))
+                    }
+
+                    override fun onLost(network: Network) {
+                        super.onLost(network)
+                        Log.d("WifiManager", "connectToWifi onLost")
+                        connectivityManager.bindProcessToNetwork(null)
+                        connectivityManager.unregisterNetworkCallback(this)
+                        trySend(Result.success(WifiStatus.CONNECTION_LOST))
+                        close()
+                    }
+
+                    override fun onUnavailable() {
+                        super.onUnavailable()
+                        Log.d("WifiManager", "connectToWifi onUnavailable")
+                        connectivityManager.bindProcessToNetwork(null)
+                        connectivityManager.unregisterNetworkCallback(this)
+                        trySend(Result.success(WifiStatus.CONNECTION_FAILED))
+                        close()
+                    }
                 }
-            }
-        )
-    }
+            )
+        }catch (e: Exception){
+            Log.d("WifiManager", "connectToWifi Erro ${e.message} -> ${e.stackTraceToString()}")
+            trySend(Result.failure(GoProException(GoProError.UNABLE_TO_CONNECT_TO_WIFI)))
+            close()
+        }
+
+        awaitClose {
+            Log.d("WifiManager", "connectToWifi closing")
+            close()
+        }
+    }.flowOn(Dispatchers.IO)
 }

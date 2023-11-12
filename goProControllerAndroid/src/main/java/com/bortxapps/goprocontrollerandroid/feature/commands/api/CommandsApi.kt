@@ -18,14 +18,14 @@ class CommandsApi(private val bleManager: BleManager = BleManager.instance) {
 
     suspend fun enableWifiAp() =
         bleManager.sendData(
-            GoProUUID.WIFI_AP_SERVICE.uuid,
+            GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.EnableWifi.byteArray
         )
 
     suspend fun disableWifiAp() =
         bleManager.sendData(
-            GoProUUID.WIFI_AP_SERVICE.uuid,
+            GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.DisableWifi.byteArray
         )
@@ -35,6 +35,20 @@ class CommandsApi(private val bleManager: BleManager = BleManager.instance) {
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.SetPresetsVideo.byteArray
+        )
+
+    suspend fun setShutterOff() =
+        bleManager.sendData(
+            GoProUUID.SERVICE_UUID.uuid,
+            GoProUUID.CQ_COMMAND.uuid,
+            GoProBleCommands.SetShutterOff.byteArray
+        )
+
+    suspend fun setShutterOn() =
+        bleManager.sendData(
+            GoProUUID.SERVICE_UUID.uuid,
+            GoProUUID.CQ_COMMAND.uuid,
+            GoProBleCommands.SetShutterOn.byteArray
         )
 
     suspend fun setPresetsPhoto() =

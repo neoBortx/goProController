@@ -17,10 +17,13 @@ enum class GoProError {
     /*
      * This error is thrown when the device hardware does not support BLE
      */
+    UNABLE_TO_ENABLE_WIFI,
+    UNABLE_TO_CONNECT_TO_WIFI,
     BLE_NOT_SUPPORTED,
     COMMUNICATION_FAILED,
     SEND_COMMAND_FAILED,
     SEND_COMMAND_REJECTED,
+    UNKNOWN_RECEIVED_DATA,
     UNABLE_TO_MAP_DATA,
     MISSING_DTO_MAPPER,
     OTHER,

@@ -25,5 +25,6 @@ interface GoProCommands {
     suspend fun setFrameRate(frameRate: FrameRate): Result<Boolean>
     suspend fun setHyperSmooth(hyperSmooth: HyperSmooth): Result<Boolean>
     suspend fun setSpeed(speed: Speed): Result<Boolean>
-
+    suspend fun setShutterOn(): Result<Boolean>
+    suspend fun setShutterOff(): Result<Boolean>
 }

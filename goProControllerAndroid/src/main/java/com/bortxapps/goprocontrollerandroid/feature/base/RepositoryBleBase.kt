@@ -6,8 +6,9 @@ import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.launchBleOperationWithValidations
+import java.util.Locale
 
-abstract class RepositoryBaseBle(val context: Context) {
+abstract class RepositoryBleBase(val context: Context) {
 
     @OptIn(ExperimentalUnsignedTypes::class)
     suspend inline fun <MAPPED> launchReadRequest(
@@ -20,7 +21,7 @@ abstract class RepositoryBaseBle(val context: Context) {
             Log.d(
                 "RepositoryBaseBle",
                 "launchReadRequest response -> $requestLog : ${response.id}, ${response.status}, ${
-                    response.data.toByteArray().joinToString(separator = ":") { String.format("%02X", it) }
+                    response.data.toByteArray().joinToString(separator = ":") { String.format(Locale.getDefault(), "%02X", it) }
                 }}"
             )
             val mapped: MAPPED = mapResponse(response, customMapper)
@@ -29,6 +30,7 @@ abstract class RepositoryBaseBle(val context: Context) {
         }
     }
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     suspend fun launchSimpleWriteRequest(
         request: suspend () -> BleNetworkMessage,
         responseValidator: ((BleNetworkMessage) -> Boolean)? = null
@@ -59,7 +61,7 @@ abstract class RepositoryBaseBle(val context: Context) {
                 Log.d(
                     "RepositoryBaseBle",
                     "launchComplexWriteRequest response -> $requestLog : ${response.id}, ${response.status}, ${
-                        response.data.toByteArray().joinToString(separator = ":") { String.format("%02X", it) }
+                        response.data.toByteArray().joinToString(separator = ":") { String.format(Locale.getDefault(), "%02X", it) }
                     }"
                 )
                 val mapped: MAPPED = mapResponse(response, customMapper)
@@ -76,8 +78,11 @@ abstract class RepositoryBaseBle(val context: Context) {
     fun <MAPPED> mapResponse(response: BleNetworkMessage, mapper: ((BleNetworkMessage) -> MAPPED)): MAPPED {
         return try {
             mapper(response)
+        } catch (ex: GoProException) {
+            Log.e("RepositoryBaseBle", "mapResponse ${ex.message} ${ex.stackTraceToString()}")
+            throw ex
         } catch (ex: Exception) {
-            Log.e("RepositoryBaseBle", "mapResponse ${ex.message} ${ex.stackTrace}")
+            Log.e("RepositoryBaseBle", "mapResponse ${ex.message} ${ex.stackTraceToString()}")
             throw GoProException(GoProError.UNABLE_TO_MAP_DATA)
         }
     }
