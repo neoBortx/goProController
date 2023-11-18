@@ -43,9 +43,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // BLE
-    implementation(libs.kable)
-
     // KTOR
     implementation(libs.ktor.client)
     implementation(libs.ktor.client.resources)

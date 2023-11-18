@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
+import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.os.Handler
@@ -19,11 +20,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flowOn
 import java.util.UUID
+
 class BleDeviceScanner {
 
     companion object {
         private const val SCAN_PERIOD: Long = 10000
     }
+
     @SuppressLint("MissingPermission")
     fun scanBleDevicesNearby(
         context: Context, serviceUuid: UUID, scanPeriod: Long = SCAN_PERIOD
@@ -35,21 +38,36 @@ class BleDeviceScanner {
             close(GoProException(GoProError.CANNOT_START_SEARCHING_CAMERAS))
         })
 
-        scanner?.startScan(getFilters(serviceUuid), getSettings(), leScanCallback).also {
-            if (it == null) {
-                close(GoProException(GoProError.CANNOT_START_SEARCHING_CAMERAS))
+        try {
+            scanner?.startScan(getFilters(serviceUuid), getSettings(), leScanCallback).also {
+                if (it == null) {
+                    close(GoProException(GoProError.CANNOT_START_SEARCHING_CAMERAS))
+                }
             }
+        } catch (ex: Exception) {
+            Log.e("BleManager", "Error starting scan ${ex.message} ${ex.stackTraceToString()}")
+            close(GoProException(GoProError.CANNOT_START_SEARCHING_CAMERAS))
         }
 
+
         Handler(Looper.getMainLooper()).postDelayed({
-            Log.d("BleManager", "Discovering time expired")
-            scanner?.stopScan(leScanCallback)
+            try {
+                Log.d("BleManager", "Discovering time expired")
+                scanner?.stopScan(leScanCallback)
+            } catch (ex: Exception) {
+                Log.e("BleManager", "Error stopping scan ${ex.message} ${ex.stackTraceToString()}")
+            }
+
             close()
         }, scanPeriod)
 
         awaitClose {
-            Log.d("BleManager", "Closing callback flow")
-            scanner?.stopScan(leScanCallback)
+            try {
+                Log.d("BleManager", "Closing callback flow")
+                scanner?.stopScan(leScanCallback)
+            } catch (ex: Exception) {
+                Log.e("BleManager", "Error stopping scan ${ex.message} ${ex.stackTraceToString()}")
+            }
             close()
         }
     }.flowOn(Dispatchers.IO)
@@ -79,9 +97,20 @@ class BleDeviceScanner {
             }
         }
 
+        override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+            super.onBatchScanResults(results)
+            results?.forEach {result ->
+                result.device?.let {
+                    onResult(it)
+                }
+            }
+        }
+
         override fun onScanFailed(errorCode: Int) {
             super.onScanFailed(errorCode)
             onFailure()
         }
+
+
     }
 }

@@ -26,7 +26,7 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
             ktorHttpClient.get(GOPRO_BASE_URL) {
                 url {
                     appendPathSegments(path)
-                    queryParams.forEach { (key, value) -> parameters.append(key, value) }
+                    queryParams.forEach { (key, value) -> encodedParameters.append(key, value) }
                 }
                 contentType(ContentType.Application.Json)
                 setBody(body)

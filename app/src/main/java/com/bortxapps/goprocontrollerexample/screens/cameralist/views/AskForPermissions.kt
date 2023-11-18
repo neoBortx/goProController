@@ -36,6 +36,18 @@ fun AskForPermissions(okWindow: @Composable () -> Unit, errorWindow: @Composable
         )
     }
 
+    permissions.add(
+        rememberPermissionState(
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    )
+
+    permissions.add(
+        rememberPermissionState(
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
+
     if (permissions.all { it.status.isGranted }) {
         Log.d("CameraListScreen", "Camera permission Granted")
         okWindow()

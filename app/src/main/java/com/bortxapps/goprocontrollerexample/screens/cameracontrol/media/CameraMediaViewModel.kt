@@ -3,15 +3,19 @@ package com.bortxapps.goprocontrollerexample.screens.cameracontrol.media
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bortxapps.goprocontrollerandroid.exposedapi.GoProController
+import com.bortxapps.goprocontrollerandroid.feature.GET_THUMBNAIL_URL
+import com.bortxapps.goprocontrollerandroid.feature.GOPRO_BASE_URL
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.manager.WifiStatus
 import com.bortxapps.goprocontrollerexample.screens.cameracontrol.commands.intent.CameraCommandsScreenIntent
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class CameraMediaViewModel(val goProController: GoProController) : ViewModel() {
 
@@ -71,4 +75,6 @@ class CameraMediaViewModel(val goProController: GoProController) : ViewModel() {
             })
         }
     }
+
+    suspend fun onLoadThumbnail(s: String): ByteArray? = goProController.getMediaThumbnail(s).getOrElse { null }
 }

@@ -1,10 +1,12 @@
 package com.bortxapps.goprocontrollerandroid.feature.media.api
 
+import android.util.Log
 import com.bortxapps.goprocontrollerandroid.feature.GET_MEDIA_INFO_URL
 import com.bortxapps.goprocontrollerandroid.feature.GET_MEDIA_LIST
 import com.bortxapps.goprocontrollerandroid.feature.GET_SCREENNAIL_URL
 import com.bortxapps.goprocontrollerandroid.feature.GET_THUMBNAIL_URL
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest.KtorClient
+import io.ktor.client.statement.HttpResponse
 
 class MediaApi(private val client: KtorClient = KtorClient()) {
     suspend fun getMediaList() =
@@ -28,9 +30,8 @@ class MediaApi(private val client: KtorClient = KtorClient()) {
             queryParams = mapOf("path" to fileName)
         )
 
-    suspend fun getMediaInfo(fileName: String) =
-        client.getRawRequest(
-            path = GET_MEDIA_INFO_URL,
-            queryParams = mapOf("path" to fileName)
-        )
+    suspend fun getMediaInfo(fileName: String) = client.getRawRequest(
+        path = GET_MEDIA_INFO_URL,
+        queryParams = mapOf("path" to fileName)
+    )
 }

@@ -7,6 +7,8 @@ import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBase
 import com.bortxapps.goprocontrollerandroid.feature.media.api.MediaApi
+import com.bortxapps.goprocontrollerandroid.feature.media.customMappers.goProMediaItemMapper
+import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaInfo
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaItem
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaItems
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.manager.WifiManager
@@ -19,12 +21,24 @@ class GoProMediaImpl(
     private val wifiManager: WifiManager = WifiManager()
 ) : RepositoryBase(), GoProMedia {
 
-    override suspend fun getMediaList() = launchRequest<MediaItems, MediaItems>(
-        request = { api.getMediaList() }
-    )
+    override suspend fun getMediaList() = try {
+        val mediaItems = launchSimpleRequest<MediaItems>(request = { api.getMediaList() })
 
-    override suspend fun getMediaInfo(fileName: String) = launchRequest<MediaItem, MediaItems>(
-        request = { api.getMediaInfo(fileName = fileName) }
+        Result.success(mediaItems.media.map { directory ->
+            directory.files.map { mediaItem ->
+                val mediaInfo = launchSimpleRequest<MediaInfo>(request = { api.getMediaInfo(directory.directory + "/" + mediaItem.fileName) })
+                goProMediaItemMapper(mediaItem, directory, mediaInfo)
+            }
+        }.flatten())
+
+    } catch (e: Exception) {
+        Log.e("GoProMediaImpl", "Error getting media list ${e.message} -> ${e.stackTraceToString()}")
+        Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
+    }
+
+
+    override suspend fun getMediaInfo(filePath: String) = launchRequest<MediaItem, MediaItems>(
+        request = { api.getMediaInfo(fileName = filePath) }
     )
 
     override suspend fun getMediaVideo(fileName: String) = launchRequest<ByteArray, ByteArray>(

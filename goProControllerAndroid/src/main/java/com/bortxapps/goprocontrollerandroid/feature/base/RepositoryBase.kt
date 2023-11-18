@@ -38,6 +38,26 @@ abstract class RepositoryBase {
         }
     }
 
+    suspend inline fun <reified DTO> launchSimpleRequest(
+        request: () -> HttpResponse,
+    ): DTO {
+        try {
+            request().let { response ->
+                return when (response.status.value) {
+                    in REST_SUCCESS_CODE..REST_SUCCESS_FINISH_CODE -> {
+                        serializeResponse(response)
+                    }
+                    else ->throw GoProException(GoProError.CAMERA_API_ERROR)
+                }
+            }
+        } catch (ex: GoProException) {
+            throw ex
+        } catch (ex: Exception) {
+            Log.e("RepositoryBase", "launchRequest ${ex.message} ${ex.stackTraceToString()}")
+            throw GoProException(GoProError.CAMERA_API_ERROR)
+        }
+    }
+
     suspend inline fun <reified DTO, MAPPED> processSuccess(
         response: HttpResponse,
         noinline customSerializer: ((String) -> DTO)?,
