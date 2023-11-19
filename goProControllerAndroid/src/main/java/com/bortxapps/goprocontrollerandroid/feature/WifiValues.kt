@@ -1,6 +1,8 @@
 package com.bortxapps.goprocontrollerandroid.feature
 
 const val GOPRO_BASE_URL = "http://10.5.5.9:8080/"
+const val GOPRO_MEDIA_BASE_PATH = "videos/DCIM/"
+const val GOPRO_MEDIA_PATH = GOPRO_BASE_URL + GOPRO_MEDIA_BASE_PATH
 const val GOPRO_BASE_PATH = "gopro"
 
 enum class GoProResources(val url: String) {

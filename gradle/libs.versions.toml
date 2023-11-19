@@ -16,6 +16,7 @@ compose-bom = "2023.03.00"
 koin-bom = "3.3.0"
 ktlint = "11.6.1"
 detekt = "1.23.0"
+media3 = "1.0.0-rc01"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -63,9 +64,11 @@ ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
 
-#Images
+#Media
 coil = { group = "io.coil-kt", name = "coil-compose", version = "2.2.0" }
-
+media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref= "media3" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-exoplayer-rtsp = { group = "androidx.media3", name = "media3-exoplayer-rtsp", version.ref = "media3" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -60,34 +60,18 @@ class KtorClient(private var ktorHttpClient: HttpClient = getKtorHttpClient()) {
         throw GoProException(GoProError.OTHER)
     }
 
-    suspend fun getVideo(
-        path: String
+    suspend fun getFile(
+        path: String,
+        contentType: ContentType
     ): HttpResponse = try {
-        ktorHttpClient.get(GOPRO_BASE_URL) {
+        ktorHttpClient.get(GOPRO_BASE_URL+"videos/DCIM/") {
             url {
                 appendPathSegments(path)
             }
-            contentType(ContentType.Video.MPEG)
+            contentType(contentType)
         }
     } catch (ex: SocketException) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
-        throw GoProException(GoProError.COMMUNICATION_FAILED)
-    } catch (ex: Exception) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
-        throw GoProException(GoProError.OTHER)
-    }
-
-    suspend fun getImage(
-        path: String
-    ): HttpResponse = try {
-        ktorHttpClient.get(GOPRO_BASE_URL) {
-            url {
-                appendPathSegments(path)
-            }
-            contentType(ContentType.Image.JPEG)
-        }
-    } catch (ex: SocketException) {
-        Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")
+        Log.e("KtorClient", "getfile $path type $contentType -> Error  ${ex.message} -> ${ex.stackTraceToString()}")
         throw GoProException(GoProError.COMMUNICATION_FAILED)
     } catch (ex: Exception) {
         Log.e("KtorClient", "getImage ${ex.message} ${ex.stackTraceToString()}")

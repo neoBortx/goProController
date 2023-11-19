@@ -41,11 +41,11 @@ class GoProMediaImpl(
         request = { api.getMediaInfo(fileName = filePath) }
     )
 
-    override suspend fun getMediaVideo(fileName: String) = launchRequest<ByteArray, ByteArray>(
+    override suspend fun getMediaVideo(fileName: String) = launchFileRequest(
         request = { api.getMediaVideo(fileName = fileName) }
     )
 
-    override suspend fun getMediaImage(fileName: String) = launchRequest<ByteArray, ByteArray>(
+    override suspend fun getMediaImage(fileName: String) = launchFileRequest(
         request = { api.getMediaImage(fileName = fileName) }
     )
 

@@ -6,4 +6,5 @@ sealed class CameraMediaScreenState {
     object Loading : CameraMediaScreenState()
     data class Error(val error: String) : CameraMediaScreenState()
     data class MediaList(val items: List<GoProMediaItem>) : CameraMediaScreenState()
+
 }

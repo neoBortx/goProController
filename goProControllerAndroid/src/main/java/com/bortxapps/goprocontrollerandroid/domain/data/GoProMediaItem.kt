@@ -1,9 +1,6 @@
 package com.bortxapps.goprocontrollerandroid.domain.data
 
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -12,6 +9,7 @@ data class GoProMediaItem(
     val fileName: String,
     val filePath: String,
     val fileFullUrl: String,
+    val fileMediaUrl: String,
     val fileSize: Long?,
     val creationTimeStamp: Long?,
     val modTimeStamp: Long?,
@@ -34,13 +32,14 @@ data class GoProMediaItem(
 ) {
     fun getSize(): String {
         val units = arrayOf("Bytes", "KB", "MB", "GB", "TB")
+        val byteSize = 1024.0
 
         if (fileSize == null || fileSize == 0L) {
             return "0 Byte"
         }
 
         val unitIndex = (Math.log10(fileSize.toDouble()) / 3).toInt()
-        val sizeConverted = fileSize / Math.pow(1024.0, unitIndex.toDouble())
+        val sizeConverted = fileSize / Math.pow(byteSize, unitIndex.toDouble())
 
         return String.format("%.2f %s", sizeConverted, units[unitIndex])
     }

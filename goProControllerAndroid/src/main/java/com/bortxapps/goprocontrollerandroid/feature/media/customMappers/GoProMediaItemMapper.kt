@@ -5,7 +5,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItem
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItemType
 import com.bortxapps.goprocontrollerandroid.feature.GET_SCREENNAIL_URL
 import com.bortxapps.goprocontrollerandroid.feature.GET_THUMBNAIL_URL
-import com.bortxapps.goprocontrollerandroid.feature.GOPRO_BASE_URL
+import com.bortxapps.goprocontrollerandroid.feature.GOPRO_MEDIA_PATH
 import com.bortxapps.goprocontrollerandroid.feature.media.data.AudioOption
 import com.bortxapps.goprocontrollerandroid.feature.media.data.ContentType
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaDirectory
@@ -17,6 +17,7 @@ fun goProMediaItemMapper(mediaItem: MediaItem, mediaDirectory: MediaDirectory, m
     fileName = mediaItem.fileName,
     filePath = mediaDirectory.directory,
     fileFullUrl = mediaDirectory.directory + "/" + mediaItem.fileName,
+    fileMediaUrl = GOPRO_MEDIA_PATH + mediaDirectory.directory + "/" + mediaItem.fileName,
     fileSize = mediaItem.size?.toLong(),
     creationTimeStamp = mediaItem.creationTimeStamp,
     modTimeStamp = mediaItem.mod,

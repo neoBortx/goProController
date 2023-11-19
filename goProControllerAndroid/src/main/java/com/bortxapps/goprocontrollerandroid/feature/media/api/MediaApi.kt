@@ -1,22 +1,27 @@
 package com.bortxapps.goprocontrollerandroid.feature.media.api
 
-import android.util.Log
 import com.bortxapps.goprocontrollerandroid.feature.GET_MEDIA_INFO_URL
 import com.bortxapps.goprocontrollerandroid.feature.GET_MEDIA_LIST
 import com.bortxapps.goprocontrollerandroid.feature.GET_SCREENNAIL_URL
 import com.bortxapps.goprocontrollerandroid.feature.GET_THUMBNAIL_URL
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest.KtorClient
-import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
 
 class MediaApi(private val client: KtorClient = KtorClient()) {
     suspend fun getMediaList() =
         client.getRawRequest(path = GET_MEDIA_LIST)
 
     suspend fun getMediaVideo(fileName: String) =
-        client.getVideo(path = fileName)
+        client.getFile(
+            path = fileName,
+            contentType = ContentType.Video.MP4
+        )
 
     suspend fun getMediaImage(fileName: String) =
-        client.getImage(path = fileName)
+        client.getFile(
+            path = fileName,
+            contentType = ContentType.Video.MPEG
+        )
 
     suspend fun getMediaThumbnail(fileName: String) =
         client.getRawRequest(

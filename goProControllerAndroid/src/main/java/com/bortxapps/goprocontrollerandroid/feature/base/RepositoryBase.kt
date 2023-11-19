@@ -1,12 +1,14 @@
 package com.bortxapps.goprocontrollerandroid.feature.base
 
 import android.util.Log
-import arrow.core.Either
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
+import io.ktor.utils.io.jvm.javaio.toInputStream
+import java.io.InputStream
 
 abstract class RepositoryBase {
 
@@ -32,6 +34,25 @@ abstract class RepositoryBase {
             }
         } catch (ex: GoProException) {
              Result.failure(ex)
+        } catch (ex: Exception) {
+            Log.e("RepositoryBase", "launchRequest ${ex.message} ${ex.stackTraceToString()}")
+            Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
+        }
+    }
+
+    suspend inline fun launchFileRequest(request: () -> HttpResponse): Result<InputStream> {
+        return try {
+            request().let { response ->
+                return when (response.status.value) {
+                    in REST_SUCCESS_CODE..REST_SUCCESS_FINISH_CODE -> {
+                        return Result.success(response.bodyAsChannel().toInputStream())
+                    }
+
+                    else -> Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
+                }
+            }
+        } catch (ex: GoProException) {
+            Result.failure(ex)
         } catch (ex: Exception) {
             Log.e("RepositoryBase", "launchRequest ${ex.message} ${ex.stackTraceToString()}")
             Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
