@@ -68,6 +68,7 @@ class CameraMediaViewModel(private val goProController: GoProController) : ViewM
                 loadGroupImage(goProMediaItem)
             }
 
+            GoProMediaItemType.TIMELAPSE,
             GoProMediaItemType.VIDEO,
             GoProMediaItemType.CHAPTERED_VIDEO -> {
                 loadVideo(goProMediaItem)
