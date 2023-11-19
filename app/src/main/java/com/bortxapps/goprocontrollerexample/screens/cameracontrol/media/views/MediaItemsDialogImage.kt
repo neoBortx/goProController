@@ -61,7 +61,9 @@ fun MediaItemsDialogImage(
                 SubcomposeAsyncImage(
                     model = goProMediaItem.fileMediaUrl,
                     contentDescription = "image",
-                    modifier = Modifier.size(300.dp),
+                    modifier = Modifier
+                        .size(300.dp)
+                        .padding(horizontal = 8.dp),
                     loading = {
                         Box(contentAlignment = Alignment.Center) {
                             CircularProgressIndicator(modifier = Modifier.size(64.dp))

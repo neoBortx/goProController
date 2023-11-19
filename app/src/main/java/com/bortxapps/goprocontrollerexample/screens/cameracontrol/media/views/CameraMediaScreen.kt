@@ -16,6 +16,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItem
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItemType
+import com.bortxapps.goprocontrollerandroid.domain.data.GroupMediaItem
 import com.bortxapps.goprocontrollerexample.R
 import com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.CameraMediaScreenDialogState
 import com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.CameraMediaScreenState
@@ -55,6 +56,7 @@ private fun Screen(
                         is CameraMediaScreenState.Loading -> MediaItemsLoading()
                         is CameraMediaScreenState.Error -> MediaItemsError(this)
                         is CameraMediaScreenState.MediaList -> MediaItemsList(it.items, onLoadThumbnail, onItemClicked)
+
                     }
                 }
             }
@@ -68,10 +70,10 @@ fun DialogScreen(stateDialog: CameraMediaScreenDialogState, onDismissRequest: ()
     when (stateDialog) {
         is CameraMediaScreenDialogState.RetrievedImageFile -> MediaItemsDialogImage(stateDialog.goProMediaItem, onDismissRequest)
         is CameraMediaScreenDialogState.RetrievedVideoFile -> MediaItemsDialogVideo(stateDialog.goProMediaItem, onDismissRequest)
+        is CameraMediaScreenDialogState.RetrievedGroupImageFile -> MediaItemsDialogImageGroup(stateDialog.goProMediaItem, onDismissRequest)
         else -> {}
     }
 }
-
 
 
 @Preview(showBackground = true)
@@ -98,7 +100,8 @@ fun PreviewItem() {
             videoFraneRateNumerator = null,
             videoFraneRateDenominator = null,
             videoDurationSeconds = null,
-            videoWithImageStabilization = null
+            videoWithImageStabilization = null,
+            groupImagesNames = emptyList()
         ),
         onLoadThumbnail = { null }, {
 

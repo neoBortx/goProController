@@ -7,4 +7,6 @@ sealed class CameraMediaScreenDialogState {
     data class RetrievedImageFile(val goProMediaItem: GoProMediaItem) : CameraMediaScreenDialogState()
     data class RetrievedVideoFile(val goProMediaItem: GoProMediaItem) : CameraMediaScreenDialogState()
 
+    data class RetrievedGroupImageFile(val goProMediaItem: GoProMediaItem) : CameraMediaScreenDialogState()
+
 }

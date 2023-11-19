@@ -55,8 +55,17 @@ class CameraMediaViewModel(private val goProController: GoProController) : ViewM
 
     fun onItemClicked(goProMediaItem: GoProMediaItem) {
         when (goProMediaItem.mediaType) {
-            GoProMediaItemType.SINGLE_PHOTO -> {
+            GoProMediaItemType.SINGLE_PHOTO,
+            GoProMediaItemType.NIGHT_PHOTO -> {
                 loadImage(goProMediaItem)
+            }
+
+            GoProMediaItemType.TIMELAPSE_PHOTO,
+            GoProMediaItemType.CONTINUOUS_PHOTO,
+            GoProMediaItemType.NIGHT_LAPSE_PHOTO,
+            GoProMediaItemType.BURST_PHOTO,
+            GoProMediaItemType.LIVE_BURST -> {
+                loadGroupImage(goProMediaItem)
             }
 
             GoProMediaItemType.VIDEO,
@@ -95,18 +104,16 @@ class CameraMediaViewModel(private val goProController: GoProController) : ViewM
     suspend fun onLoadThumbnail(s: String): ByteArray? = goProController.getMediaThumbnail(s).getOrElse { null }
 
     private fun loadVideo(goProMediaItem: GoProMediaItem) = viewModelScope.launch {
-        transitionToRetrievedVideoFile(goProMediaItem)
+        _stateDialog.update { CameraMediaScreenDialogState.RetrievedVideoFile(goProMediaItem) }
     }
 
     private fun loadImage(goProMediaItem: GoProMediaItem) = viewModelScope.launch {
-        transitionToRetrievedImageFile(goProMediaItem)
-    }
-
-    private fun transitionToRetrievedImageFile(goProMediaItem: GoProMediaItem) {
         _stateDialog.update { CameraMediaScreenDialogState.RetrievedImageFile(goProMediaItem) }
     }
 
-    private fun transitionToRetrievedVideoFile(goProMediaItem: GoProMediaItem) {
-        _stateDialog.update { CameraMediaScreenDialogState.RetrievedVideoFile(goProMediaItem) }
+    private fun loadGroupImage(goProMediaItem: GoProMediaItem) = viewModelScope.launch {
+        _stateDialog.update { CameraMediaScreenDialogState.RetrievedGroupImageFile(goProMediaItem) }
     }
+
+
 }

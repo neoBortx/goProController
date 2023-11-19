@@ -14,9 +14,6 @@ data class MediaItem(
     // Last modified time (seconds since epoch)
     @SerialName("mod")
     val mod: Long? = null,
-    // ID of first member of a group (for grouped media items)
-    @SerialName("b")
-    val b: String? = null,
     //Low resolution video file size
     @SerialName("glrv")
     val lowResolutionVideoSize: Long? = null,
@@ -26,15 +23,21 @@ data class MediaItem(
     // Size of (group) media in bytes
     @SerialName("s")
     val size: String? = null,
+
+
+    //GROUPS
     // Group ID (if grouped media item)
     @SerialName("g")
     val groupId: String? = null,
+    // ID of first member of a group (for grouped media items)
+    @SerialName("b")
+    val firstMemberOfGroup: String? = null,
     // ID of last member of a group (for grouped media items)
     @SerialName("l")
-    val l: String? = null,
+    val lastMemberOfGroup: String? = null,
     // List of missing/deleted group member IDs (for grouped media items)
     @SerialName("m")
-    val m: List<String>? = null,
+    val missingMemberOfGroup: List<String>? = null,
     // Group type (for grouped media items) (b -> burst, c -> continuous shot, n -> night lapse, t -> time lapse)
     @SerialName("t")
     val groupType: GroupType? = null,

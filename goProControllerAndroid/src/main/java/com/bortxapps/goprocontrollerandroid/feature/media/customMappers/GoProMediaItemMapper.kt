@@ -3,6 +3,7 @@ package com.bortxapps.goprocontrollerandroid.feature.media.customMappers
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProAudioOption
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItem
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItemType
+import com.bortxapps.goprocontrollerandroid.domain.data.GroupMediaItem
 import com.bortxapps.goprocontrollerandroid.feature.GET_SCREENNAIL_URL
 import com.bortxapps.goprocontrollerandroid.feature.GET_THUMBNAIL_URL
 import com.bortxapps.goprocontrollerandroid.feature.GOPRO_MEDIA_PATH
@@ -11,6 +12,7 @@ import com.bortxapps.goprocontrollerandroid.feature.media.data.ContentType
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaDirectory
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaInfo
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaItem
+import java.util.Locale
 
 fun goProMediaItemMapper(mediaItem: MediaItem, mediaDirectory: MediaDirectory, mediaInfo: MediaInfo) = GoProMediaItem(
     mediaId = "",
@@ -33,6 +35,7 @@ fun goProMediaItemMapper(mediaItem: MediaItem, mediaDirectory: MediaDirectory, m
     videoFraneRateDenominator = mediaInfo.fpsDenom,
     videoDurationSeconds = mediaInfo.dur,
     videoWithImageStabilization = mediaInfo.eis == 1u,
+    groupImagesNames = mapGroupImages(mediaItem, mediaDirectory)
 )
 
 fun mapAudioOption(audioOption: AudioOption?) = when (audioOption) {
@@ -57,4 +60,22 @@ fun mapMediaType(contentType: ContentType?): GoProMediaItemType = when (contentT
     ContentType.RAW_PHOTO -> GoProMediaItemType.RAW_PHOTO
     ContentType.LIVE_BURST -> GoProMediaItemType.LIVE_BURST
     else -> GoProMediaItemType.UNKNOWN
+}
+
+fun mapGroupImages(mediaItem: MediaItem, mediaDirectory: MediaDirectory): List<GroupMediaItem> {
+    return if (listOf(mediaItem.firstMemberOfGroup, mediaItem.lastMemberOfGroup, mediaItem.groupId).all { it != null }) {
+        val prefixLength = 3
+        val missingMembers = mediaItem.missingMemberOfGroup?.map { it.toInt() } ?: emptyList()
+        val filenameType = mediaItem.fileName.substringAfterLast(".")
+        val fileNamePrefix = mediaItem.fileName.substringBeforeLast(".").dropLast(prefixLength)
+
+        (mediaItem.firstMemberOfGroup!!.toInt()..mediaItem.lastMemberOfGroup!!.toInt())
+            .subtract(missingMembers.toSet())
+            .map {
+                val fileName = fileNamePrefix + String.format(Locale.getDefault(), "%03d", it) + "." + filenameType
+                GroupMediaItem(fileName, GOPRO_MEDIA_PATH + mediaDirectory.directory + "/" + fileName)
+            }
+    } else {
+        emptyList()
+    }
 }
