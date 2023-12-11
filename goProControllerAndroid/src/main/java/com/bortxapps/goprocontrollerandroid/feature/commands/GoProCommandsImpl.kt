@@ -2,23 +2,23 @@ package com.bortxapps.goprocontrollerandroid.feature.commands
 
 import android.content.Context
 import com.bortxapps.goprocontrollerandroid.domain.contracts.GoProCommands
-import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBleBase
-import com.bortxapps.goprocontrollerandroid.feature.commands.api.CommandsApi
-import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapFrameRate
-import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapHyperSmooth
-import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapResolution
-import com.bortxapps.goprocontrollerandroid.feature.commands.data.CameraStatus
-import com.bortxapps.goprocontrollerandroid.feature.connection.decoder.decodeMessageAsMap
 import com.bortxapps.goprocontrollerandroid.domain.data.FrameRate
 import com.bortxapps.goprocontrollerandroid.domain.data.HyperSmooth
 import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
 import com.bortxapps.goprocontrollerandroid.domain.data.Speed
+import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBleBase
+import com.bortxapps.goprocontrollerandroid.feature.commands.api.CommandsApi
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapFrameRate
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapHyperSmooth
 import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapPresets
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapResolution
 import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapSpeed
+import com.bortxapps.goprocontrollerandroid.feature.commands.data.CameraStatus
+import com.bortxapps.goprocontrollerandroid.feature.connection.decoder.decodeMessageAsMap
 
 class GoProCommandsImpl(
     context: Context,
-    private val api: CommandsApi = CommandsApi()
+    private val api: CommandsApi
 ) : RepositoryBleBase(context), GoProCommands {
     @OptIn(ExperimentalUnsignedTypes::class)
     override suspend fun getWifiApSSID() = launchReadRequest(

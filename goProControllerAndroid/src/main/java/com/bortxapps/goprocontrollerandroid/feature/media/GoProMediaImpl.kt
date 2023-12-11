@@ -9,7 +9,6 @@ import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBase
 import com.bortxapps.goprocontrollerandroid.feature.media.api.MediaApi
 import com.bortxapps.goprocontrollerandroid.feature.media.customMappers.goProMediaItemMapper
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaInfo
-import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaItem
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaItems
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.manager.WifiManager
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.manager.WifiStatus
@@ -17,8 +16,8 @@ import kotlinx.coroutines.flow.Flow
 
 class GoProMediaImpl(
     private val context: Context,
-    private val api: MediaApi = MediaApi(),
-    private val wifiManager: WifiManager = WifiManager()
+    private val api: MediaApi,
+    private val wifiManager: WifiManager
 ) : RepositoryBase(), GoProMedia {
 
     override suspend fun getMediaList() = try {
@@ -26,28 +25,22 @@ class GoProMediaImpl(
 
         Result.success(mediaItems.media.map { directory ->
             directory.files.map { mediaItem ->
-                val mediaInfo = launchSimpleRequest<MediaInfo>(request = { api.getMediaInfo(directory.directory + "/" + mediaItem.fileName) })
+                val mediaInfo = launchSimpleRequest<MediaInfo>(request = {
+                    api.getMediaInfo(directory.directory + "/" + mediaItem.fileName)
+                }
+                )
                 goProMediaItemMapper(mediaItem, directory, mediaInfo)
             }
         }.flatten())
+
+    } catch (e: GoProException) {
+        Result.failure(e)
 
     } catch (e: Exception) {
         Log.e("GoProMediaImpl", "Error getting media list ${e.message} -> ${e.stackTraceToString()}")
         Result.failure(GoProException(GoProError.CAMERA_API_ERROR))
     }
 
-
-    override suspend fun getMediaInfo(filePath: String) = launchRequest<MediaItem, MediaItems>(
-        request = { api.getMediaInfo(fileName = filePath) }
-    )
-
-    override suspend fun getMediaVideo(fileName: String) = launchFileRequest(
-        request = { api.getMediaVideo(fileName = fileName) }
-    )
-
-    override suspend fun getMediaImage(fileName: String) = launchFileRequest(
-        request = { api.getMediaImage(fileName = fileName) }
-    )
 
     override suspend fun getMediaThumbnail(fileName: String) = launchRequest<ByteArray, ByteArray>(
         request = { api.getMediaThumbnail(fileName = fileName) }

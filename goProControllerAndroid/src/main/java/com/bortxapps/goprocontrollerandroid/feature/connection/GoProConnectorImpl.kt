@@ -1,6 +1,7 @@
 package com.bortxapps.goprocontrollerandroid.feature.connection
 
 import android.content.Context
+import android.util.Log
 import com.bortxapps.goprocontrollerandroid.domain.contracts.GoProConnector
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProCamera
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
@@ -16,19 +17,19 @@ import kotlinx.coroutines.flow.map
 
 class GoProConnectorImpl(
     context: Context,
-    private val api: ConnectionApi = ConnectionApi()
+    private val api: ConnectionApi
 ) : RepositoryBleBase(context), GoProConnector {
 
     override suspend fun getNearByCameras(): Result<Flow<GoProCamera>> =
         launchBleOperationWithValidations(context) {
-            Result.success(api.getNearByCameras(context, GoProUUID.SERVICE_UUID.uuid).map {
+            Result.success(api.getNearByCameras(GoProUUID.SERVICE_UUID.uuid).map {
                 it.toMapCamera()
             })
         }
 
 
     override suspend fun stopSearch(): Result<Boolean> = launchBleOperationWithValidations(context) {
-        api.stopSearch(context)
+        api.stopSearch()
         Result.success(true)
     }
 
@@ -40,10 +41,18 @@ class GoProConnectorImpl(
 
     override suspend fun connectToDevice(address: String): Result<Boolean> =
         launchBleOperationWithValidations(context) {
-            if (api.connectToDevice(context, address)) {
-                Result.success(true)
-            } else {
+            try {
+                if (api.connectToDevice(context, address)) {
+                    Result.success(true)
+                } else {
+                    Result.failure(GoProException(GoProError.OTHER))
+                }
+            } catch (e: GoProException) {
+                Result.failure(e)
+            } catch (e: Exception) {
+                Log.e("BleManager", "connectToDevice ${e.message} ${e.stackTraceToString()}")
                 Result.failure(GoProException(GoProError.OTHER))
             }
+
         }
 }

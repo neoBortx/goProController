@@ -4,11 +4,11 @@ import android.content.Context
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManager
 import java.util.UUID
 
-class ConnectionApi(val bleManager: BleManager = BleManager.instance) {
-    fun getNearByCameras(context: Context, serviceUUID: UUID) =
-        bleManager.getDevicesByService(context, serviceUUID)
+class ConnectionApi internal constructor(private val bleManager: BleManager) {
+    fun getNearByCameras(serviceUUID: UUID) =
+        bleManager.getDevicesByService(serviceUUID)
 
-    fun stopSearch(context: Context) = bleManager.stopSearchDevices(context)
+    fun stopSearch() = bleManager.stopSearchDevices()
 
     fun getPairedCameras(context: Context, deviceNamePrefix: String) =
         bleManager.getPairedDevicesByPrefix(context, deviceNamePrefix)

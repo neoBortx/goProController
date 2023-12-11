@@ -1,5 +1,6 @@
 package com.bortxapps.goprocontrollerexample.di
 
+import com.bortxapps.goprocontrollerandroid.exposedapi.GoProApi
 import com.bortxapps.goprocontrollerandroid.exposedapi.GoProController
 import com.bortxapps.goprocontrollerexample.screens.cameracontrol.commands.CameraCommandsViewModel
 import com.bortxapps.goprocontrollerexample.screens.cameracontrol.home.HomeCameraControlViewModel
@@ -11,7 +12,10 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    single<GoProController> { GoProController(androidContext()) }
+    single<GoProController> {
+        GoProApi.initialize(androidContext())
+        GoProApi.getInstance()
+    }
     viewModel { CameraListViewModel(get()) }
     viewModel { CameraMediaViewModel(get()) }
     viewModel { CameraStatusViewModel(get()) }

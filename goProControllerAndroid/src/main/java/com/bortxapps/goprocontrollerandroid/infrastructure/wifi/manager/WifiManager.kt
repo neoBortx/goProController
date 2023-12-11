@@ -20,13 +20,23 @@ import kotlinx.coroutines.flow.flowOn
 
 class WifiManager {
 
-    fun enableWifi(context: Context) {
+    private fun getIntent() = Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY).apply {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+
+    private fun getNetworkRequest(networkSpecifier: WifiNetworkSpecifier) =
+        NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .setNetworkSpecifier(networkSpecifier).build()
+
+    private fun getNetworkSpecifier(ssid: String, password: String) =
+        WifiNetworkSpecifier.Builder().setSsid(ssid).setWpa2Passphrase(password).build()
+
+
+    internal fun enableWifi(context: Context) {
         val wifiManager: WifiManager by lazy { context.getSystemService(Context.WIFI_SERVICE) as WifiManager }
 
         if (!wifiManager.isWifiEnabled) {
-            val panelIntent = Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
-            panelIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(panelIntent)
+            context.startActivity(getIntent())
         }
     }
 
@@ -35,14 +45,8 @@ class WifiManager {
         password: String,
         context: Context
     ): Flow<Result<WifiStatus>> = callbackFlow {
-        val connectivityManager by lazy { context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
-
-        val wifiNetworkSpecifier =
-            WifiNetworkSpecifier.Builder().setSsid(ssid).setWpa2Passphrase(password).build()
-
-        val networkRequest =
-            NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                .setNetworkSpecifier(wifiNetworkSpecifier).build()
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkRequest = getNetworkRequest(getNetworkSpecifier(ssid, password))
 
         trySend(Result.success(WifiStatus.CONNECTING))
 
@@ -53,14 +57,14 @@ class WifiManager {
                 networkRequest,
                 object : ConnectivityManager.NetworkCallback() {
                     override fun onAvailable(network: Network) {
-                        super.onAvailable(network)
+                        //super.onAvailable(network)
                         Log.d("WifiManager", "connectToWifi onAvailable")
                         connectivityManager.bindProcessToNetwork(network)
                         trySend(Result.success(WifiStatus.CONNECTED))
                     }
 
                     override fun onLost(network: Network) {
-                        super.onLost(network)
+                        //super.onLost(network)
                         Log.d("WifiManager", "connectToWifi onLost")
                         connectivityManager.bindProcessToNetwork(null)
                         connectivityManager.unregisterNetworkCallback(this)
@@ -69,7 +73,7 @@ class WifiManager {
                     }
 
                     override fun onUnavailable() {
-                        super.onUnavailable()
+                        //super.onUnavailable()
                         Log.d("WifiManager", "connectToWifi onUnavailable")
                         connectivityManager.bindProcessToNetwork(null)
                         connectivityManager.unregisterNetworkCallback(this)
@@ -78,7 +82,7 @@ class WifiManager {
                     }
                 }
             )
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.d("WifiManager", "connectToWifi Erro ${e.message} -> ${e.stackTraceToString()}")
             trySend(Result.failure(GoProException(GoProError.UNABLE_TO_CONNECT_TO_WIFI)))
             close()

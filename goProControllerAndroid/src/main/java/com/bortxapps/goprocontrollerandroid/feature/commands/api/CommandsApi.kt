@@ -1,14 +1,14 @@
 package com.bortxapps.goprocontrollerandroid.feature.commands.api
 
-import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProBleCommands
-import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.domain.data.FrameRate
 import com.bortxapps.goprocontrollerandroid.domain.data.HyperSmooth
 import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
 import com.bortxapps.goprocontrollerandroid.domain.data.Speed
+import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProBleCommands
+import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManager
 
-class CommandsApi(private val bleManager: BleManager = BleManager.instance) {
+class CommandsApi internal constructor(private val bleManager: BleManager) {
 
     suspend fun getWifiApSSID() =
         bleManager.readData(GoProUUID.WIFI_AP_SERVICE.uuid, GoProUUID.WIFI_AP_SSID.uuid)

@@ -4,6 +4,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+private const val BYTE_SIZE = 1024.0
+private const val SIZE_DIVIDER = 3
+
 data class GoProMediaItem(
     //Unique identifier of the media item
     val mediaId: String,
@@ -26,9 +29,9 @@ data class GoProMediaItem(
     //Type of the media item
     val mediaType: GoProMediaItemType,
     //Height of the media item
-    val mediaHeight: Long,
+    val mediaHeight: Int?,
     //Width of the media item
-    val mediaWidth: Long,
+    val mediaWidth: Int?,
 
     //photo
     val photoWithHDR: Boolean? = null,
@@ -46,16 +49,15 @@ data class GoProMediaItem(
 ) {
     fun getSize(): String {
         val units = arrayOf("Bytes", "KB", "MB", "GB", "TB")
-        val byteSize = 1024.0
 
         if (fileSize == null || fileSize == 0L) {
             return "0 Byte"
         }
 
-        val unitIndex = (Math.log10(fileSize.toDouble()) / 3).toInt()
-        val sizeConverted = fileSize / Math.pow(byteSize, unitIndex.toDouble())
+        val unitIndex = (Math.log10(fileSize.toDouble()) / SIZE_DIVIDER).toInt()
+        val sizeConverted = fileSize / Math.pow(BYTE_SIZE, unitIndex.toDouble())
 
-        return String.format("%.2f %s", sizeConverted, units[unitIndex])
+        return String.format(Locale.getDefault(), "%.2f %s", sizeConverted, units[unitIndex])
     }
 
     fun getCreationDate(): String {

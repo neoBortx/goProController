@@ -7,7 +7,7 @@ import com.bortxapps.goprocontrollerandroid.feature.GET_THUMBNAIL_URL
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest.KtorClient
 import io.ktor.http.ContentType
 
-class MediaApi(private val client: KtorClient = KtorClient()) {
+class MediaApi internal constructor(private val client: KtorClient) {
     suspend fun getMediaList() =
         client.getRawRequest(path = GET_MEDIA_LIST)
 

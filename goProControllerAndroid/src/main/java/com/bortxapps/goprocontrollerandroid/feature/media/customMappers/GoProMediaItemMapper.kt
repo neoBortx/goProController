@@ -1,6 +1,9 @@
 package com.bortxapps.goprocontrollerandroid.feature.media.customMappers
 
+import android.util.Log
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProAudioOption
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItem
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItemType
 import com.bortxapps.goprocontrollerandroid.domain.data.GroupMediaItem
@@ -14,29 +17,34 @@ import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaInfo
 import com.bortxapps.goprocontrollerandroid.feature.media.data.MediaItem
 import java.util.Locale
 
-fun goProMediaItemMapper(mediaItem: MediaItem, mediaDirectory: MediaDirectory, mediaInfo: MediaInfo) = GoProMediaItem(
-    mediaId = "",
-    fileName = mediaItem.fileName,
-    filePath = mediaDirectory.directory,
-    fileFullUrl = mediaDirectory.directory + "/" + mediaItem.fileName,
-    fileMediaUrl = GOPRO_MEDIA_PATH + mediaDirectory.directory + "/" + mediaItem.fileName,
-    fileSize = mediaItem.size?.toLong(),
-    creationTimeStamp = mediaItem.creationTimeStamp,
-    modTimeStamp = mediaItem.mod,
-    thumbnailUrl = GET_THUMBNAIL_URL + "?path=" + mediaDirectory.directory + "/" + mediaItem.fileName,
-    screenNailUrl = GET_SCREENNAIL_URL + "?path=" + mediaDirectory.directory + "/" + mediaItem.fileName,
-    mediaType = mapMediaType(mediaInfo.ct),
-    mediaHeight = 0,
-    mediaWidth = 0,
-    photoWithHDR = mediaInfo.hdr == 1u,
-    photoWithWDR = mediaInfo.wdr == 1u,
-    audioOption = mapAudioOption(mediaInfo.ao),
-    videoFraneRateNumerator = mediaInfo.fps,
-    videoFraneRateDenominator = mediaInfo.fpsDenom,
-    videoDurationSeconds = mediaInfo.dur,
-    videoWithImageStabilization = mediaInfo.eis == 1u,
-    groupImagesNames = mapGroupImages(mediaItem, mediaDirectory)
-)
+fun goProMediaItemMapper(mediaItem: MediaItem, mediaDirectory: MediaDirectory, mediaInfo: MediaInfo) = try {
+    GoProMediaItem(
+        mediaId = "",
+        fileName = mediaItem.fileName,
+        filePath = mediaDirectory.directory,
+        fileFullUrl = mediaDirectory.directory + "/" + mediaItem.fileName,
+        fileMediaUrl = GOPRO_MEDIA_PATH + mediaDirectory.directory + "/" + mediaItem.fileName,
+        fileSize = mediaItem.size?.toLong(),
+        creationTimeStamp = mediaItem.creationTimeStamp,
+        modTimeStamp = mediaItem.mod,
+        thumbnailUrl = GET_THUMBNAIL_URL + "?path=" + mediaDirectory.directory + "/" + mediaItem.fileName,
+        screenNailUrl = GET_SCREENNAIL_URL + "?path=" + mediaDirectory.directory + "/" + mediaItem.fileName,
+        mediaType = mapMediaType(mediaInfo.ct),
+        mediaHeight = mediaInfo.h?.toInt(),
+        mediaWidth = mediaInfo.w?.toInt(),
+        photoWithHDR = mediaInfo.hdr?.let { it == 1u },
+        photoWithWDR = mediaInfo.wdr?.let { it == 1u },
+        audioOption = mapAudioOption(mediaInfo.ao),
+        videoFraneRateNumerator = mediaInfo.fps,
+        videoFraneRateDenominator = mediaInfo.fpsDenom,
+        videoDurationSeconds = mediaInfo.dur,
+        videoWithImageStabilization =mediaInfo.eis?.let { it == 1u },
+        groupImagesNames = mapGroupImages(mediaItem, mediaDirectory)
+    )
+} catch (ex: Exception) {
+    Log.e("GoProMediaImpl", "Error mapping media item ${ex.message} -> ${ex.stackTraceToString()}")
+    throw GoProException(GoProError.UNABLE_TO_MAP_DATA)
+}
 
 fun mapAudioOption(audioOption: AudioOption?) = when (audioOption) {
     AudioOption.OFF -> GoProAudioOption.OFF
@@ -62,13 +70,13 @@ fun mapMediaType(contentType: ContentType?): GoProMediaItemType = when (contentT
     else -> GoProMediaItemType.UNKNOWN
 }
 
+private const val FILENAME_SUFFIX_LENGTH = 3
+
 fun mapGroupImages(mediaItem: MediaItem, mediaDirectory: MediaDirectory): List<GroupMediaItem> {
-    return if (listOf(mediaItem.firstMemberOfGroup, mediaItem.lastMemberOfGroup, mediaItem.groupId).all { it != null }) {
-        val prefixLength = 3
+    return if (checkDataIsConsistent(mediaItem)) {
         val missingMembers = mediaItem.missingMemberOfGroup?.map { it.toInt() } ?: emptyList()
         val filenameType = mediaItem.fileName.substringAfterLast(".")
-        val fileNamePrefix = mediaItem.fileName.substringBeforeLast(".").dropLast(prefixLength)
-
+        val fileNamePrefix = mediaItem.fileName.substringBeforeLast(".").dropLast(FILENAME_SUFFIX_LENGTH)
         (mediaItem.firstMemberOfGroup!!.toInt()..mediaItem.lastMemberOfGroup!!.toInt())
             .subtract(missingMembers.toSet())
             .map {
@@ -79,3 +87,9 @@ fun mapGroupImages(mediaItem: MediaItem, mediaDirectory: MediaDirectory): List<G
         emptyList()
     }
 }
+
+fun checkDataIsConsistent(mediaItem: MediaItem) =
+    listOf(mediaItem.firstMemberOfGroup, mediaItem.lastMemberOfGroup, mediaItem.groupId).all { it != null }
+            && mediaItem.firstMemberOfGroup!!.toInt() <= mediaItem.lastMemberOfGroup!!.toInt()
+            && mediaItem.fileName.contains(".")
+            && mediaItem.fileName.substringBeforeLast(".").length >= FILENAME_SUFFIX_LENGTH

@@ -1,5 +1,6 @@
 package com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils
 
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
@@ -8,7 +9,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 
 private fun checkBluetoothEnabled(context: Context) {
-    if (getBluetoothAdapter(context)?.isEnabled == false) {
+    if (context.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled == false) {
         throw GoProException(GoProError.BLE_NOT_ENABLED)
     }
 }

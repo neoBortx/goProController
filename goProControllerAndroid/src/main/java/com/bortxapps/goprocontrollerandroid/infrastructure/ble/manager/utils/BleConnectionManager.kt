@@ -24,6 +24,7 @@ private fun getBluetoothGattCallback(
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
+                    Log.d("BleConnectionManager", "onConnectionStateChange: STATE_CONNECTED")
                     onConnected()
                 }
 
@@ -79,7 +80,7 @@ private fun getBluetoothGattCallback(
 
 @SuppressLint("MissingPermission")
 @OptIn(ExperimentalUnsignedTypes::class)
-fun connectToGoProBleDevice(
+internal fun connectToGoProBleDevice(
     context: Context,
     device: BluetoothDevice,
     onConnected: () -> Unit,
