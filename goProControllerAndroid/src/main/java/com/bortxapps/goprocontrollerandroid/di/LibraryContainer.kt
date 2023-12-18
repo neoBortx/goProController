@@ -16,6 +16,12 @@ import com.bortxapps.goprocontrollerandroid.feature.media.GoProMediaImpl
 import com.bortxapps.goprocontrollerandroid.feature.media.api.MediaApi
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManager
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManagerDeviceSearchOperations
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManagerGattCallBacks
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManagerGattConnectionOperations
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManagerGattReadOperations
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManagerGattSubscriptions
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManagerGattWriteOperations
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.scanner.BleDeviceScannerCallbackBuilder
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.scanner.BleDeviceScannerFilterBuilder
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.scanner.BleDeviceScannerManager
@@ -50,7 +56,24 @@ internal class LibraryContainer(context: Context) {
     private val bleNetworkMessageProcessor = BleNetworkMessageProcessor()
     private val gattMutex = Mutex()
     private val buildVersionProvider = BuildVersionProvider()
-    private val bleManager = BleManager(bleNetworkMessageProcessor, bleDeviceScannerManager, gattMutex, buildVersionProvider)
+
+    private val bleManagerGattCallBacks = BleManagerGattCallBacks(bleNetworkMessageProcessor)
+    private val bleManagerDeviceSearchOperations = BleManagerDeviceSearchOperations(bleDeviceScannerManager)
+    private val bleManagerGattConnectionOperations =
+        BleManagerGattConnectionOperations(bleManagerDeviceSearchOperations, bleManagerGattCallBacks, gattMutex)
+    private val bleManagerGattSubscriptions = BleManagerGattSubscriptions(bleManagerGattCallBacks, buildVersionProvider, gattMutex)
+    private val bleManagerGattWriteOperations = BleManagerGattWriteOperations(bleManagerGattCallBacks, buildVersionProvider, gattMutex)
+    private val bleManagerGattReadOperations = BleManagerGattReadOperations(bleManagerGattCallBacks, gattMutex)
+
+
+    private val bleManager = BleManager(
+        bleManagerDeviceSearchOperations,
+        bleManagerGattConnectionOperations,
+        bleManagerGattSubscriptions,
+        bleManagerGattReadOperations,
+        bleManagerGattWriteOperations,
+        bleManagerGattCallBacks
+    )
 
     //features api
     private val mediaApi = MediaApi(ktorHttpClient)

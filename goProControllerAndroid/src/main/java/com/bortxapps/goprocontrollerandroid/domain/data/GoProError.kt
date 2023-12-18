@@ -1,6 +1,7 @@
 package com.bortxapps.goprocontrollerandroid.domain.data
 
 enum class GoProError {
+    CAMERA_NOT_FOUND,
     CAMERA_NOT_CONNECTED,
     MISSING_BLE_PERMISSIONS,
     BLE_NOT_ENABLED,

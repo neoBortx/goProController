@@ -1,7 +1,6 @@
 package com.bortxapps.goprocontrollerandroid.infrastructure.ble.data
 
 import android.util.Log
-import kotlin.experimental.and
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class BleNetworkMessageProcessor {
@@ -71,6 +70,11 @@ class BleNetworkMessageProcessor {
         }
         packet += buff
         bytesRemaining -= buff.size
+    }
+
+    fun clearData() {
+        packet = ubyteArrayOf()
+        bytesRemaining = 0
     }
 
     private fun isContinuationMessage(data: UByteArray) = data.first().and(Mask.Continuation.value) == Mask.Continuation.value

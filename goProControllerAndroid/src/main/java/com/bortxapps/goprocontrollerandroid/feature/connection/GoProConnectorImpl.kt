@@ -10,6 +10,7 @@ import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBleBase
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GOPRO_NAME_PREFIX
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.feature.connection.api.ConnectionApi
+import com.bortxapps.goprocontrollerandroid.feature.connection.mapper.goProBleConnectionStateMapper
 import com.bortxapps.goprocontrollerandroid.feature.connection.mapper.toMapCamera
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.launchBleOperationWithValidations
 import kotlinx.coroutines.flow.Flow
@@ -55,4 +56,13 @@ class GoProConnectorImpl(
             }
 
         }
+
+    override suspend fun disconnectBle() = launchBleOperationWithValidations(context) {
+        api.disconnectBle()
+        Result.success(true)
+    }
+
+    override suspend fun subscribeToBleConnectionStatusChanges() = api.subscribeToConnectionStatusChanges().map {
+        goProBleConnectionStateMapper(it)
+    }
 }

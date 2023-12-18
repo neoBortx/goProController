@@ -15,4 +15,8 @@ class ConnectionApi internal constructor(private val bleManager: BleManager) {
 
     suspend fun connectToDevice(context: Context, address: String) =
         bleManager.connectToDevice(context, address)
+
+    fun subscribeToConnectionStatusChanges() = bleManager.subscribeToConnectionStatusChanges()
+
+    suspend fun disconnectBle() = bleManager.disconnect()
 }
