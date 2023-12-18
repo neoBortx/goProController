@@ -30,7 +30,9 @@ internal class BleManagerGattSubscriptions(
                 launchGattOperation {
                     bleManagerGattCallBacks.initWriteDescriptorOperation()
                     if (writeDescriptor(characteristic, getDescriptionValueToSubscribe(characteristic), bluetoothGatt)) {
-                        bleManagerGattCallBacks.waitForWrittenDescriptor()
+                        launchDeferredOperation {
+                            bleManagerGattCallBacks.waitForWrittenDescriptor()
+                        }
                     } else {
                         throw GoProException(GoProError.UNABLE_TO_SUBSCRIBE_TO_NOTIFICATIONS)
                     }

@@ -64,7 +64,10 @@ internal class BleManagerGattWriteOperations(
             }
 
             if (res) {
-                bleManagerGattCallBacks.waitForDataRead()
+                launchDeferredOperation {
+                    bleManagerGattCallBacks.waitForDataRead()
+                }
+
             } else {
                 null
             }

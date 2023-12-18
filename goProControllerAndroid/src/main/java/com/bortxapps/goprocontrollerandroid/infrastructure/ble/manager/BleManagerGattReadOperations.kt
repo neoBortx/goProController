@@ -28,7 +28,9 @@ internal class BleManagerGattReadOperations(private val bleManagerGattCallBacks:
         resultRead = launchGattOperation {
             bleManagerGattCallBacks.initReadOperation(complexResponse)
             if (bluetoothGatt.readCharacteristic(characteristic)) {
-                bleManagerGattCallBacks.waitForDataRead()
+                launchDeferredOperation {
+                    bleManagerGattCallBacks.waitForDataRead()
+                }
             } else {
                 null
             }

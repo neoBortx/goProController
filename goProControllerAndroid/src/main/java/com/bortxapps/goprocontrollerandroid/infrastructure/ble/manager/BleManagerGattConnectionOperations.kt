@@ -36,7 +36,9 @@ internal class BleManagerGattConnectionOperations(
     ): BluetoothGatt? = launchGattOperation {
         bleManagerGattCallBacks.initConnectOperation()
         device.connectGatt(context, false, gattCallBacks)?.let {
-            bleManagerGattCallBacks.waitForConnectionEstablished()
+            launchDeferredOperation {
+                bleManagerGattCallBacks.waitForConnectionEstablished()
+            }
             it
         }
     }
@@ -47,7 +49,9 @@ internal class BleManagerGattConnectionOperations(
     ): Boolean = launchGattOperation {
         bleManagerGattCallBacks.initDisconnectOperation()
         bluetoothGatt.disconnect()
-        bleManagerGattCallBacks.waitForDisconnected()
+        launchDeferredOperation {
+            bleManagerGattCallBacks.waitForDisconnected()
+        }
         true
     }
 
@@ -64,6 +68,10 @@ internal class BleManagerGattConnectionOperations(
     internal suspend fun discoverServices(bluetoothGatt: BluetoothGatt): Boolean = launchGattOperation {
         bleManagerGattCallBacks.initDiscoverServicesOperation()
         bluetoothGatt.discoverServices()
-        bleManagerGattCallBacks.waitForServicesDiscovered() ?: throw GoProException(GoProError.UNABLE_TO_CONNECT_TO_CAMERA)
+        launchDeferredOperation {
+            bleManagerGattCallBacks.waitForServicesDiscovered()
+        }
     }
+
+
 }
