@@ -46,7 +46,7 @@ class BleManagerTest {
     private val bleManagerGattReadOperationsMock = mockk<BleManagerGattReadOperations>(relaxed = true)
     private val bleManagerGattWriteOperationsMock = mockk<BleManagerGattWriteOperations>(relaxed = true)
     private val bleManagerGattCallBacksMock = mockk<BleManagerGattCallBacks>(relaxed = true)
-
+    private lateinit var bleConfiguration: BleConfiguration
 
     private lateinit var bleManager: BleManager
     private lateinit var mutex: Mutex
@@ -66,6 +66,7 @@ class BleManagerTest {
     fun setUp() {
         MockKAnnotations.init(this)
         mutex = Mutex()
+        bleConfiguration = BleConfiguration()
 
         every { bluetoothDeviceMock.name } returns goProName
         every { bluetoothDeviceMock.address } returns goProAddress
@@ -79,14 +80,17 @@ class BleManagerTest {
         every { bleManagerGattCallBacksMock.subscribeToConnectionStatusChanges() } returns MutableStateFlow(BluetoothProfile.STATE_CONNECTED)
 
         bleManager = spyk(
-            BleManager(
-                bleManagerDeviceConnectionMock,
-                bleManagerGattConnectionOperationsMock,
-                bleManagerGattSubscriptionsMock,
-                bleManagerGattReadOperationsMock,
-                bleManagerGattWriteOperationsMock,
-                bleManagerGattCallBacksMock
-            )
+            BleManager.Builder()
+                .setOperationTimeOutMillis(20)
+                .build(
+                    bleManagerDeviceConnectionMock,
+                    bleManagerGattConnectionOperationsMock,
+                    bleManagerGattSubscriptionsMock,
+                    bleManagerGattReadOperationsMock,
+                    bleManagerGattWriteOperationsMock,
+                    bleManagerGattCallBacksMock,
+                    bleConfiguration
+                )
         )
     }
 
@@ -322,7 +326,6 @@ class BleManagerTest {
     //endregion
 
     //region readData
-    @OptIn(ExperimentalUnsignedTypes::class)
     @Test
     fun `readData gatt not initialized expect exception`() = runTest {
         Assert.assertThrows(GoProException::class.java) {

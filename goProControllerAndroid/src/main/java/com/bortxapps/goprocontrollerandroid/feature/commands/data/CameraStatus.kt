@@ -9,14 +9,10 @@ object CameraStatus {
     fun decodeStatus(map: Map<UByte, UByteArray>): Map<String, String> {
         val res = mutableMapOf<String, String>()
         map.keys.forEach {
-            try {
-                val key: CameraStatusIds = CameraStatusIds.fromValue(it.toString())
-                map[it]?.let { value ->
-                    Log.d("CameraStatus", "Decoding key: $key, value: $value")
-                    res += key.name to cameraStatusEnumConversionMap[key]?.invoke(value).toString()
-                }
-            } catch (ex: Exception) {
-                Log.e("CameraStatus", "Error decoding key: $it -> ${ex.stackTraceToString()}")
+            val key: CameraStatusIds = CameraStatusIds.fromValue(it.toString())
+            map[it]?.let { value ->
+                Log.d("CameraStatus", "Decoding key: $key, value: $value")
+                res += key.name to cameraStatusEnumConversionMap[key]?.invoke(value).toString()
             }
         }
         return res

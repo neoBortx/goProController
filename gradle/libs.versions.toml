@@ -7,7 +7,6 @@ androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 appcompat = "1.6.1"
 material = "1.9.0"
-ble = "2.6.1"
 org-jetbrains-kotlin-jvm = "1.8.0"
 ktor = "2.2.1"
 lifecycle-runtime-ktx = "2.6.2"
@@ -64,6 +63,7 @@ turbine = { group = "app.cash.turbine", name = "turbine", version = "1.0.0" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.5.2" }
+mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version = "4.9.1" }
 
 
 

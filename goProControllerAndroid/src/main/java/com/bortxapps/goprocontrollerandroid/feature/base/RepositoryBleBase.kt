@@ -11,9 +11,9 @@ import java.util.Locale
 abstract class RepositoryBleBase(val context: Context) {
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    suspend inline fun <MAPPED> launchReadRequest(
-        noinline request: suspend () -> BleNetworkMessage,
-        noinline customMapper: ((BleNetworkMessage) -> MAPPED)
+    suspend fun <MAPPED> launchReadRequest(
+        request: suspend () -> BleNetworkMessage,
+        customMapper: ((BleNetworkMessage) -> MAPPED)
     ): Result<MAPPED> = launchBleOperationWithValidations(context) {
         val requestLog = request.javaClass.enclosingMethod?.name ?: "Unknown"
         Log.d("RepositoryBaseBle", "launchReadRequest request -> $requestLog")

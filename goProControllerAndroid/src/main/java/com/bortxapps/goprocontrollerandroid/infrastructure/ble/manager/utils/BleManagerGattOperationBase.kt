@@ -3,22 +3,23 @@ package com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils
 import android.util.Log
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleConfiguration
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.CancellationException
 
-internal abstract class BleManagerGattOperationBase(private val gattMutex: Mutex) {
+internal abstract class BleManagerGattOperationBase(
+    private val gattMutex: Mutex,
+    private val bleConfiguration: BleConfiguration
+) {
 
-    companion object {
-        private const val OPERATION_TIME_OUT: Long = 7000
-    }
 
     protected suspend fun <T> launchGattOperation(operation: suspend () -> T): T {
 
         val error: GoProError = try {
-            return  withTimeout(OPERATION_TIME_OUT) {
+            return withTimeout(bleConfiguration.operationTimeoutMillis) {
                 gattMutex.withLock {
                     operation()
                 }

@@ -9,7 +9,7 @@ import android.os.Build
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
-import com.bortxapps.goprocontrollerandroid.urils.BuildVersionProvider
+import com.bortxapps.goprocontrollerandroid.utils.BuildVersionProvider
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
@@ -18,6 +18,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.verify
 import junit.framework.TestCase
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -40,6 +41,7 @@ class BleManagerGattWriteOperationsTest {
 
     private lateinit var bleManagerGattWriteOperations: BleManagerGattWriteOperations
     private lateinit var bleManagerGattCallBacks: BleManagerGattCallBacks
+    private lateinit var bleConfiguration: BleConfiguration
     private lateinit var mutex: Mutex
     private val serviceUUID = UUID.randomUUID()
     private val characteristicUUID = UUID.randomUUID()
@@ -57,13 +59,17 @@ class BleManagerGattWriteOperationsTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
+        bleConfiguration = BleConfiguration().apply {
+            operationTimeoutMillis = 20
+        }
         mutex = Mutex()
         bleManagerGattCallBacks = spyk(BleManagerGattCallBacks(bleNetworkMessageProcessorMock))
         bleManagerGattWriteOperations = spyk(
             BleManagerGattWriteOperations(
                 bleManagerGattCallBacks,
                 buildVersionProviderMock,
-                mutex
+                mutex,
+                bleConfiguration
             )
         )
         every { bluetoothDeviceMock.name } returns goProName
@@ -117,6 +123,24 @@ class BleManagerGattWriteOperationsTest {
             bleNetworkMessage,
             bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, value, bluetoothGattMock, false)
         )
+    }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun testSendData_complexData_sendSuccess_oldAPI_expectTrue() = runTest {
+        val value = ByteArray(1)
+
+        every { bluetoothGattMock.writeCharacteristic(bluetoothCharacteristicMock) } answers {
+            callbackSlot.captured.onCharacteristicRead(bluetoothGattMock, bluetoothCharacteristicMock, value, BluetoothGatt.GATT_SUCCESS)
+            true
+        }
+
+        TestCase.assertEquals(
+            bleNetworkMessage,
+            bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, value, bluetoothGattMock, true)
+        )
+
+        verify { bleManagerGattCallBacks.initReadOperation(true) }
     }
 
     @Test

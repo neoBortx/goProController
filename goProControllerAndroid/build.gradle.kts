@@ -61,4 +61,5 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockwebserver)
 }

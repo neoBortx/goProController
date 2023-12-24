@@ -106,14 +106,4 @@ enum class GoProBleCommands(val byteArray: ByteArray) {
     GetActivePresetGroup(byteArrayOf(0x02, 0x13, 0x60)),
     GetActivePreset(byteArrayOf(0x02, 0x13, 0x61));
 
-    companion object {
-        fun valueOfByteArray(byteArray: ByteArray): GoProBleCommands? {
-            for (command in values()) {
-                if (command.byteArray.contentEquals(byteArray)) {
-                    return command
-                }
-            }
-            return null
-        }
-    }
 }

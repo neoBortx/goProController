@@ -9,8 +9,12 @@ import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.Ble
 import kotlinx.coroutines.sync.Mutex
 import java.util.UUID
 
-internal class BleManagerGattReadOperations(private val bleManagerGattCallBacks: BleManagerGattCallBacks, gattMutex: Mutex) :
-    BleManagerGattOperationBase(gattMutex) {
+internal class BleManagerGattReadOperations(
+    private val bleManagerGattCallBacks: BleManagerGattCallBacks,
+    gattMutex: Mutex,
+    bleConfiguration: BleConfiguration
+) :
+    BleManagerGattOperationBase(gattMutex, bleConfiguration) {
 
     //region read data
     @SuppressLint("MissingPermission")
@@ -20,7 +24,7 @@ internal class BleManagerGattReadOperations(private val bleManagerGattCallBacks:
         bluetoothGatt: BluetoothGatt,
         complexResponse: Boolean = false
     ): BleNetworkMessage {
-        var resultRead: BleNetworkMessage? = null
+        val resultRead: BleNetworkMessage?
 
         val characteristic = launchGattOperation {
             bluetoothGatt.getService(serviceUUID)?.getCharacteristic(characteristicUUID)

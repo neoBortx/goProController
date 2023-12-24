@@ -55,6 +55,6 @@ fun privateGenerateClient() = HttpClient(CIO) {
             }
         }
         // TODO change to NONE
-        level = LogLevel.ALL
+        level = LogLevel.NONE
     }
 }

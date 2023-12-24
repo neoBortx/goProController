@@ -10,7 +10,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.BleManagerGattOperationBase
-import com.bortxapps.goprocontrollerandroid.urils.BuildVersionProvider
+import com.bortxapps.goprocontrollerandroid.utils.BuildVersionProvider
 import kotlinx.coroutines.sync.Mutex
 import java.util.UUID
 
@@ -18,7 +18,8 @@ internal class BleManagerGattWriteOperations(
     private val bleManagerGattCallBacks: BleManagerGattCallBacks,
     private val buildVersionProvider: BuildVersionProvider,
     gattMutex: Mutex,
-) : BleManagerGattOperationBase(gattMutex) {
+    bleConfiguration: BleConfiguration
+) : BleManagerGattOperationBase(gattMutex, bleConfiguration) {
 
     //region send data
     internal suspend fun sendData(

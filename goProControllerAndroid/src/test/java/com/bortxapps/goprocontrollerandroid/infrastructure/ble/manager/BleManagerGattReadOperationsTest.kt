@@ -34,6 +34,7 @@ class BleManagerGattReadOperationsTest {
 
     private lateinit var bleManagerGattReadOperations: BleManagerGattReadOperations
     private lateinit var bleManagerGattCallBacks: BleManagerGattCallBacks
+    private lateinit var bleConfiguration: BleConfiguration
     private lateinit var mutex: Mutex
     private val callbackSlot = slot<BluetoothGattCallback>()
     private val serviceUUID = UUID.randomUUID()
@@ -50,9 +51,12 @@ class BleManagerGattReadOperationsTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
+        bleConfiguration = BleConfiguration().apply {
+            operationTimeoutMillis = 20
+        }
         mutex = Mutex()
         bleManagerGattCallBacks = spyk(BleManagerGattCallBacks(bleNetworkMessageProcessorMock))
-        bleManagerGattReadOperations = spyk(BleManagerGattReadOperations(bleManagerGattCallBacks, mutex))
+        bleManagerGattReadOperations = spyk(BleManagerGattReadOperations(bleManagerGattCallBacks, mutex, bleConfiguration))
         
         every { bluetoothDeviceMock.name } returns goProName
         every { bluetoothDeviceMock.address } returns goProAddress

@@ -11,7 +11,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.BLE_DESCRIPTION_BASE_UUID
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
-import com.bortxapps.goprocontrollerandroid.urils.BuildVersionProvider
+import com.bortxapps.goprocontrollerandroid.utils.BuildVersionProvider
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
@@ -45,6 +45,7 @@ class BleManagerGattSubscriptionsTest {
 
     private lateinit var bleManagerGattSubscriptions: BleManagerGattSubscriptions
     private lateinit var bleManagerGattCallBacks: BleManagerGattCallBacks
+    private lateinit var bleConfiguration: BleConfiguration
     private lateinit var mutex: Mutex
     private val goProName = "GoPro123456"
     private val goProAddress = "568676970987986"
@@ -57,12 +58,16 @@ class BleManagerGattSubscriptionsTest {
     fun setUp() {
         MockKAnnotations.init(this)
         mutex = Mutex()
+        bleConfiguration = BleConfiguration().apply {
+            operationTimeoutMillis = 20
+        }
         bleManagerGattCallBacks = spyk(BleManagerGattCallBacks(bleNetworkMessageProcessorMock))
         bleManagerGattSubscriptions = spyk(
             BleManagerGattSubscriptions(
                 bleManagerGattCallBacks,
                 buildVersionProviderMock,
-                mutex
+                mutex,
+                bleConfiguration
             )
         )
         every { bluetoothDeviceMock.name } returns goProName

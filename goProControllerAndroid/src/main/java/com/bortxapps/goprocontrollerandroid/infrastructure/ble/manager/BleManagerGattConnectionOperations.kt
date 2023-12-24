@@ -15,7 +15,8 @@ internal class BleManagerGattConnectionOperations(
     private val bleManagerDeviceSearchOperations: BleManagerDeviceSearchOperations,
     private val bleManagerGattCallBacks: BleManagerGattCallBacks,
     gattMutex: Mutex,
-) : BleManagerGattOperationBase(gattMutex) {
+    bleConfiguration: BleConfiguration
+) : BleManagerGattOperationBase(gattMutex, bleConfiguration) {
 
     internal suspend fun connectToDevice(context: Context, address: String, gattCallBacks: BluetoothGattCallback): BluetoothGatt? {
 

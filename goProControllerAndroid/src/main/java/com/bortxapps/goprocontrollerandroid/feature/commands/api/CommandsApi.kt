@@ -4,11 +4,15 @@ import com.bortxapps.goprocontrollerandroid.domain.data.FrameRate
 import com.bortxapps.goprocontrollerandroid.domain.data.HyperSmooth
 import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
 import com.bortxapps.goprocontrollerandroid.domain.data.Speed
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapFrameRateToMessage
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapHyperSmoothToMessage
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapResolutionToMessage
+import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapSpeedToMessage
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProBleCommands
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManager
 
-class CommandsApi internal constructor(private val bleManager: BleManager) {
+internal class CommandsApi internal constructor(private val bleManager: BleManager) {
 
     suspend fun getWifiApSSID() =
         bleManager.readData(GoProUUID.WIFI_AP_SERVICE.uuid, GoProUUID.WIFI_AP_SSID.uuid)
@@ -60,7 +64,6 @@ class CommandsApi internal constructor(private val bleManager: BleManager) {
 
     suspend fun setPresetsTimeLapse() =
         bleManager.sendData(
-
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.SetPresetsTimeLapse.byteArray
@@ -70,20 +73,6 @@ class CommandsApi internal constructor(private val bleManager: BleManager) {
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_COMMAND.uuid,
         GoProBleCommands.GetOpenGoProVersion.byteArray
-    )
-
-    suspend fun getHardwareInfo() = bleManager.sendData(
-        GoProUUID.SERVICE_UUID.uuid,
-        GoProUUID.CQ_COMMAND.uuid,
-        GoProBleCommands.GetHardwareInfo.byteArray,
-        complexResponse = true
-    )
-
-    suspend fun getCameraSettings() = bleManager.sendData(
-        GoProUUID.SERVICE_UUID.uuid,
-        GoProUUID.CQ_QUERY.uuid,
-        GoProBleCommands.GetCameraSettings.byteArray,
-        complexResponse = true
     )
 
     //region query settings
@@ -345,67 +334,26 @@ class CommandsApi internal constructor(private val bleManager: BleManager) {
         bleManager.sendData(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_SETTING.uuid,
-            when (resolution) {
-                Resolution.RESOLUTION_5_3K -> GoProBleCommands.SetResolution53K.byteArray
-                Resolution.RESOLUTION_4K -> GoProBleCommands.SetResolution4K.byteArray
-                Resolution.RESOLUTION_4K_4_3 -> GoProBleCommands.SetResolution4K43.byteArray
-                Resolution.RESOLUTION_2_7K -> GoProBleCommands.SetResolution2K.byteArray
-                Resolution.RESOLUTION_2_7K_4_3 -> GoProBleCommands.SetResolution2K43.byteArray
-                Resolution.RESOLUTION_1440 -> GoProBleCommands.SetResolution1440.byteArray
-                Resolution.RESOLUTION_1080 -> GoProBleCommands.SetResolution1080.byteArray
-                Resolution.RESOLUTION_4K_GOPRO_12 -> GoProBleCommands.SetResolution4KGoPro12.byteArray
-                Resolution.RESOLUTION_4K_4_3_GOPRO_12 -> GoProBleCommands.SetResolution4K43GoPro12.byteArray
-                Resolution.RESOLUTION_5K_GOPRO_12 -> GoProBleCommands.SetResolution5KGoPro12.byteArray
-                Resolution.RESOLUTION_1080_GOPRO_12 -> GoProBleCommands.SetResolution1080GoPro12.byteArray
-                Resolution.RESOLUTION_2K_GO_PRO_12 -> GoProBleCommands.SetResolution2KGoPro12.byteArray
-                Resolution.RESOLUTION_2K_4_3_GO_PRO_12 -> GoProBleCommands.SetResolution2K43GoPro12.byteArray
-            }
+            mapResolutionToMessage(resolution)
         )
 
     suspend fun setFrameRate(frameRate: FrameRate) =
         bleManager.sendData(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_SETTING.uuid,
-            when (frameRate) {
-                FrameRate.FRAME_RATE_240 -> GoProBleCommands.SetFrameRate240.byteArray
-                FrameRate.FRAME_RATE_200 -> GoProBleCommands.SetFrameRate200.byteArray
-                FrameRate.FRAME_RATE_120 -> GoProBleCommands.SetFrameRate120.byteArray
-                FrameRate.FRAME_RATE_100 -> GoProBleCommands.SetFrameRate100.byteArray
-                FrameRate.FRAME_RATE_60 -> GoProBleCommands.SetFrameRate60.byteArray
-                FrameRate.FRAME_RATE_50 -> GoProBleCommands.SetFrameRate50.byteArray
-                FrameRate.FRAME_RATE_30 -> GoProBleCommands.SetFrameRate30.byteArray
-                FrameRate.FRAME_RATE_25 -> GoProBleCommands.SetFrameRate25.byteArray
-                FrameRate.FRAME_RATE_24 -> GoProBleCommands.SetFrameRate24.byteArray
-            }
+            mapFrameRateToMessage(frameRate)
         )
 
     suspend fun setHyperSmooth(hyperSmooth: HyperSmooth) =
         bleManager.sendData(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_SETTING.uuid,
-            when (hyperSmooth) {
-                HyperSmooth.OFF -> GoProBleCommands.SetHyperSmoothOff.byteArray
-                HyperSmooth.LOW -> GoProBleCommands.SetHyperSmoothLow.byteArray
-                HyperSmooth.HIGH -> GoProBleCommands.SetHyperSmoothHigh.byteArray
-                HyperSmooth.BOOST -> GoProBleCommands.SetHyperSmoothBoost.byteArray
-                HyperSmooth.AUTO -> GoProBleCommands.SetHyperSmoothAuto.byteArray
-                HyperSmooth.STANDARD -> GoProBleCommands.SetHyperSmoothStandard.byteArray
-            }
+            mapHyperSmoothToMessage(hyperSmooth)
         )
 
     suspend fun setSpeed(speed: Speed) = bleManager.sendData(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_SETTING.uuid,
-        when (speed) {
-            Speed.REGULAR_1X -> GoProBleCommands.SetSpeedNormal.byteArray
-            Speed.SLOW_MO_2X -> GoProBleCommands.SetSpeedSlow.byteArray
-            Speed.SUPER_SLOW_MO_4X -> GoProBleCommands.SetSpeedSuperSLowMo.byteArray
-            Speed.ULTRA_SLOW_MO_8X -> GoProBleCommands.SetSpeedUltraSlowMo.byteArray
-            Speed.SLOW_MO_LONG_BATTERY_2X -> GoProBleCommands.SetSpeedSlowMoLongBattery.byteArray
-            Speed.SUPER_SLOW_MO_LONG_BATTERY_4X -> GoProBleCommands.SetSpeedSuperSlowMoLongBattery.byteArray
-            Speed.ULTRA_SLOW_MO_LONG_BATTERY_8X -> GoProBleCommands.SetSpeedUltraSlowMoLongBattery.byteArray
-            Speed.SLOW_MO_2X_4K -> GoProBleCommands.SetSpeedSlow4K.byteArray
-            Speed.SUPER_SLOW_MO_4X_17K -> GoProBleCommands.SetSpeedSuperSLowMo27k.byteArray
-        }
+        mapSpeedToMessage(speed)
     )
 }

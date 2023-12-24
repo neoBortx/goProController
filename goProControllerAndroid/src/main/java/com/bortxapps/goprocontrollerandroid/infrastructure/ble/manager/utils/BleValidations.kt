@@ -8,34 +8,34 @@ import android.util.Log
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 
-private fun checkBluetoothEnabled(context: Context) {
+internal fun checkBluetoothEnabled(context: Context) {
     if (context.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled == false) {
         throw GoProException(GoProError.BLE_NOT_ENABLED)
     }
 }
 
-private fun checkPermissionsApiCodeS(context: Context) =
+internal fun checkPermissionsApiCodeS(context: Context) =
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (
             context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PERMISSION_GRANTED
                     || context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_SCAN) != PERMISSION_GRANTED)
 
-private fun checkPermissionsOldApi(context: Context) =
+internal fun checkPermissionsOldApi(context: Context) =
     Build.VERSION.SDK_INT < Build.VERSION_CODES.S
             && (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH) != PERMISSION_GRANTED)
 
-private fun checkPermissions(context: Context) {
+internal fun checkPermissions(context: Context) {
     if (checkPermissionsApiCodeS(context) || checkPermissionsOldApi(context)) {
         throw GoProException(GoProError.MISSING_BLE_PERMISSIONS)
     }
 }
 
-private fun checkBleHardwareAvailable(context: Context) {
+internal fun checkBleHardwareAvailable(context: Context) {
     if (!context.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_BLUETOOTH_LE)) {
         throw GoProException(GoProError.BLE_NOT_SUPPORTED)
     }
 }
 
-suspend fun <T> launchBleOperationWithValidations(context: Context, action: suspend () -> Result<T>): Result<T> {
+internal suspend fun <T> launchBleOperationWithValidations(context: Context, action: suspend () -> Result<T>): Result<T> {
     return try {
         checkBleHardwareAvailable(context)
         checkBluetoothEnabled(context)

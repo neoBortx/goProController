@@ -12,7 +12,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.BLE_DESCRIPTION_BASE_UUID
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.BleManagerGattOperationBase
-import com.bortxapps.goprocontrollerandroid.urils.BuildVersionProvider
+import com.bortxapps.goprocontrollerandroid.utils.BuildVersionProvider
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
@@ -21,8 +21,9 @@ import java.util.UUID
 internal class BleManagerGattSubscriptions(
     private val bleManagerGattCallBacks: BleManagerGattCallBacks,
     private val buildVersionProvider: BuildVersionProvider,
-    gattMutex: Mutex
-) : BleManagerGattOperationBase(gattMutex) {
+    gattMutex: Mutex,
+    bleConfiguration: BleConfiguration
+) : BleManagerGattOperationBase(gattMutex, bleConfiguration) {
 
     internal suspend fun subscribeToNotifications(bluetoothGatt: BluetoothGatt) {
         getNotifiableCharacteristics(bluetoothGatt).forEach { characteristic ->

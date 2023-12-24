@@ -12,13 +12,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-internal class BleManager(
+internal class BleManager private constructor(
     private val bleManagerDeviceConnection: BleManagerDeviceSearchOperations,
     private val bleManagerGattConnectionOperations: BleManagerGattConnectionOperations,
     private val bleManagerGattSubscriptions: BleManagerGattSubscriptions,
     private val bleManagerGattReadOperations: BleManagerGattReadOperations,
     private val bleManagerGattWriteOperations: BleManagerGattWriteOperations,
-    private val bleManagerGattCallBacks: BleManagerGattCallBacks
+    private val bleManagerGattCallBacks: BleManagerGattCallBacks,
 ) {
 
     private var bluetoothGatt: BluetoothGatt? = null
@@ -30,6 +30,31 @@ internal class BleManager(
                     freeResources()
                 }
             }
+        }
+    }
+
+    data class Builder(var operationTimeOutMillis: Long? = null) {
+        fun setOperationTimeOutMillis(timeout: Long) = apply { this.operationTimeOutMillis = timeout }
+        fun build(
+            bleManagerDeviceConnection: BleManagerDeviceSearchOperations,
+            bleManagerGattConnectionOperations: BleManagerGattConnectionOperations,
+            bleManagerGattSubscriptions: BleManagerGattSubscriptions,
+            bleManagerGattReadOperations: BleManagerGattReadOperations,
+            bleManagerGattWriteOperations: BleManagerGattWriteOperations,
+            bleManagerGattCallBacks: BleManagerGattCallBacks,
+            bleConfiguration: BleConfiguration
+        ): BleManager {
+
+            operationTimeOutMillis?.let { bleConfiguration.operationTimeoutMillis }
+
+            return BleManager(
+                bleManagerDeviceConnection,
+                bleManagerGattConnectionOperations,
+                bleManagerGattSubscriptions,
+                bleManagerGattReadOperations,
+                bleManagerGattWriteOperations,
+                bleManagerGattCallBacks,
+            )
         }
     }
 

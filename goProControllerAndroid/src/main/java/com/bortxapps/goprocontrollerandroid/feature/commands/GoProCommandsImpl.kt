@@ -16,7 +16,7 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapSp
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.CameraStatus
 import com.bortxapps.goprocontrollerandroid.feature.connection.decoder.decodeMessageAsMap
 
-class GoProCommandsImpl(
+internal class GoProCommandsImpl(
     context: Context,
     private val api: CommandsApi
 ) : RepositoryBleBase(context), GoProCommands {

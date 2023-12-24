@@ -18,9 +18,4 @@ enum class GoProUUID(val uuid: UUID) {
     CQ_SETTING_RSP(UUID.fromString(GOPRO_BASE_UUID.format("0075"))),
     CQ_QUERY(UUID.fromString(GOPRO_BASE_UUID.format("0076"))),
     CQ_QUERY_RSP(UUID.fromString(GOPRO_BASE_UUID.format("0077")));
-
-    companion object {
-        private val map: Map<UUID, GoProUUID> by lazy { GoProUUID.values().associateBy { it.uuid } }
-        fun fromUuid(uuid: UUID): GoProUUID? = map[uuid]
-    }
 }

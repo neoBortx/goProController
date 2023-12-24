@@ -1,4 +1,4 @@
-package com.bortxapps.goprocontrollerandroid.urils
+package com.bortxapps.goprocontrollerandroid.utils
 
 import android.os.Build
 
