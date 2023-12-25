@@ -14,7 +14,7 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapPr
 import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapResolution
 import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapSpeed
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.CameraStatus
-import com.bortxapps.goprocontrollerandroid.feature.connection.decoder.decodeMessageAsMap
+import com.bortxapps.goprocontrollerandroid.feature.commands.decoder.decodeMessageAsMap
 
 internal class GoProCommandsImpl(
     context: Context,

@@ -10,7 +10,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
 import com.bortxapps.goprocontrollerandroid.domain.data.Speed
 import com.bortxapps.goprocontrollerandroid.feature.commands.api.CommandsApi
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.CameraStatus
-import com.bortxapps.goprocontrollerandroid.feature.connection.decoder.decodeMessageAsMap
+import com.bortxapps.goprocontrollerandroid.feature.commands.decoder.decodeMessageAsMap
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkBleHardwareAvailable
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkBluetoothEnabled
@@ -21,7 +21,6 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -51,10 +50,6 @@ class GoProCommandsImplTest {
         mockkStatic(::decodeMessageAsMap)
         mockValidationsAllOk()
         goProCommandsImpl = GoProCommandsImpl(mockedContext, mockedApi)
-    }
-
-    @After
-    fun tearDown() {
     }
 
     @Test

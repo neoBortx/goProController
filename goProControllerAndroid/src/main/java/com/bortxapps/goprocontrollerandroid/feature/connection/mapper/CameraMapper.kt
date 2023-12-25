@@ -1,9 +1,11 @@
 package com.bortxapps.goprocontrollerandroid.feature.connection.mapper
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProCamera
 import com.bortxapps.goprocontrollerandroid.domain.data.PairedState
 
+@SuppressLint("MissingPermission")
 fun BluetoothDevice.toMapCamera(): GoProCamera {
     return GoProCamera(
         name ?: "Unknown",

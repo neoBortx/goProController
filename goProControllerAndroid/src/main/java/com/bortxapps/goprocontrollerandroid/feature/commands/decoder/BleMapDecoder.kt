@@ -1,4 +1,4 @@
-package com.bortxapps.goprocontrollerandroid.feature.connection.decoder
+package com.bortxapps.goprocontrollerandroid.feature.commands.decoder
 
 import android.util.Log
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
@@ -9,10 +9,18 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import java.util.Locale
 
 @OptIn(ExperimentalUnsignedTypes::class)
 internal fun decodeMessageAsMap(bleNetworkMessage: BleNetworkMessage): Map<UByte, UByteArray> {
-    Log.d("BleMapDecoder", "Decoding message: ${bleNetworkMessage.data.toByteArray().joinToString(separator = ":") { String.format("%02X", it) }}")
+    Log.d(
+        "BleMapDecoder",
+        "Decoding message: ${
+            bleNetworkMessage.data.toByteArray().joinToString(separator = ":") {
+                String.format(Locale.getDefault(), "%02X", it)
+            }
+        }"
+    )
     var buf = bleNetworkMessage.data.drop(2)
     val map = mutableMapOf<UByte, UByteArray>()
     while (buf.isNotEmpty()) {
@@ -27,21 +35,6 @@ internal fun decodeMessageAsMap(bleNetworkMessage: BleNetworkMessage): Map<UByte
 
     Log.d("BleMapDecoder", "Decoded message: ${prettyJson.encodeToString(map.toJsonElement())}")
     return map
-}
-
-@OptIn(ExperimentalUnsignedTypes::class)
-internal fun decodeAsList(bleNetworkMessage: BleNetworkMessage): List<UByteArray> {
-    var buf = bleNetworkMessage.data.drop(2)
-    val list = mutableListOf<UByteArray>()
-
-    while (buf.isNotEmpty()) {
-        val paramLen = buf[0].toInt()
-        buf = buf.drop(1)
-
-        list += buf.take(paramLen).toUByteArray()
-        buf = buf.drop(paramLen)
-    }
-    return list
 }
 
 val prettyJson by lazy { Json { prettyPrint = true } }
@@ -62,8 +55,8 @@ fun Map<*, *>.toJsonObject(): JsonObject {
     val map = mutableMapOf<String, JsonElement>()
     this.forEach {
         val keyStr = it.key.toString()
-        if (map.containsKey(keyStr)) {
-            throw Exception("Encoding duplicate keys $keyStr")
+        require(map.containsKey(keyStr)) {
+            "Encoding duplicate keys $keyStr"
         }
         map[keyStr] = it.value.toJsonElement()
     }
@@ -79,12 +72,15 @@ fun Any?.toJsonElement(): JsonElement {
         is Array<*> -> this.toJsonArray()
         is List<*> -> this.toJsonArray()
         is Map<*, *> -> this.toJsonObject()
-        is UByteArray -> this.toByteArray().joinToString(separator = ":") { String.format("%02X", it) }.toJsonElement()
+        is UByteArray -> this.toByteArray().joinToString(separator = ":") {
+            String.format(Locale.getDefault(), "%02X", it)
+        }.toJsonElement()
+
         is UByte -> ubyteArrayOf(this).toJsonElement()
         is JsonElement -> this
         null -> JsonNull
         else -> {
-            throw Exception("Can not encode value ${this::class} to JSON")
+            throw IllegalArgumentException("Can not encode value ${this::class} to JSON")
         }
     }
 }

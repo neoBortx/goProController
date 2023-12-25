@@ -291,6 +291,7 @@ class BleDeviceScannerTest {
 
 
         flow.test {
+            awaitItem()
             bleDeviceScanner.stopSearch()
             expectNoEvents()
             awaitComplete()
