@@ -7,8 +7,8 @@ import android.bluetooth.le.ScanSettings.CALLBACK_TYPE_ALL_MATCHES
 import android.content.Context
 import android.os.Looper
 import app.cash.turbine.test
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
@@ -100,7 +100,7 @@ class BleDeviceScannerTest {
         }
 
         bleDeviceScanner.scanBleDevicesNearby(serviceUuid).test {
-            assertEquals(GoProError.CANNOT_START_SEARCHING_CAMERAS, (this.awaitError() as GoProException).goProError)
+            assertEquals(BleError.CANNOT_START_SEARCHING_DEVICES, (this.awaitError() as SimpleBleClientException).bleError)
         }
     }
 
@@ -125,7 +125,7 @@ class BleDeviceScannerTest {
         }
 
         bleDeviceScanner.scanBleDevicesNearby(serviceUuid).test {
-            assertEquals(GoProError.CANNOT_START_SEARCHING_CAMERAS, (this.awaitError() as GoProException).goProError)
+            assertEquals(BleError.CANNOT_START_SEARCHING_DEVICES, (this.awaitError() as SimpleBleClientException).bleError)
         }
     }
 
@@ -173,7 +173,7 @@ class BleDeviceScannerTest {
         }
 
         bleDeviceScanner.scanBleDevicesNearby(serviceUuid).test {
-            assertEquals(GoProError.CANNOT_START_SEARCHING_CAMERAS, (this.awaitError() as GoProException).goProError)
+            assertEquals(BleError.CANNOT_START_SEARCHING_DEVICES, (this.awaitError() as SimpleBleClientException).bleError)
         }
     }
 
@@ -200,7 +200,7 @@ class BleDeviceScannerTest {
 
         bleDeviceScanner.scanBleDevicesNearby(serviceUuid).test {
             assertEquals(bluetoothDeviceMock, awaitItem())
-            assertEquals(GoProError.CANNOT_START_SEARCHING_CAMERAS, (this.awaitError() as GoProException).goProError)
+            assertEquals(BleError.CANNOT_START_SEARCHING_DEVICES, (this.awaitError() as SimpleBleClientException).bleError)
         }
     }
 
@@ -242,7 +242,7 @@ class BleDeviceScannerTest {
         } throws Exception("Mock exception")
 
         bleDeviceScanner.scanBleDevicesNearby(serviceUuid).test {
-            assertEquals(GoProError.CANNOT_START_SEARCHING_CAMERAS, (this.awaitError() as GoProException).goProError)
+            assertEquals(BleError.CANNOT_START_SEARCHING_DEVICES, (this.awaitError() as SimpleBleClientException).bleError)
         }
     }
 
@@ -261,7 +261,7 @@ class BleDeviceScannerTest {
         }
 
         bleDeviceScanner.scanBleDevicesNearby(serviceUuid).test {
-            assertEquals(GoProError.CANNOT_START_SEARCHING_CAMERAS, (this.awaitError() as GoProException).goProError)
+            assertEquals(BleError.CANNOT_START_SEARCHING_DEVICES, (this.awaitError() as SimpleBleClientException).bleError)
         }
     }
 

@@ -6,9 +6,9 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import android.util.Log
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.BleManagerGattOperationBase
 import com.bortxapps.goprocontrollerandroid.utils.BuildVersionProvider
 import kotlinx.coroutines.sync.Mutex
@@ -22,12 +22,12 @@ internal class BleManagerGattWriteOperations(
 ) : BleManagerGattOperationBase(gattMutex, bleConfiguration) {
 
     //region send data
-    internal suspend fun sendData(
+    suspend fun sendData(
         serviceUUID: UUID,
         characteristicUUID: UUID,
         data: ByteArray,
         bluetoothGatt: BluetoothGatt,
-        complexResponse: Boolean = false
+        complexResponse: Boolean
     ): BleNetworkMessage {
         bluetoothGatt.getService(serviceUUID)?.getCharacteristic(characteristicUUID)?.let {
             return writeCharacteristic(
@@ -38,7 +38,7 @@ internal class BleManagerGattWriteOperations(
             )
         } ?: run {
             Log.e("BleManager", "writeCharacteristic characteristic is null")
-            throw GoProException(GoProError.SEND_COMMAND_FAILED)
+            throw SimpleBleClientException(BleError.SEND_COMMAND_FAILED)
         }
 
     }
@@ -49,7 +49,7 @@ internal class BleManagerGattWriteOperations(
         bluetoothGatt: BluetoothGatt,
         value: ByteArray,
         characteristic: BluetoothGattCharacteristic,
-        complexResponse: Boolean = false
+        complexResponse: Boolean
     ): BleNetworkMessage {
         return launchGattOperation {
             bleManagerGattCallBacks.initReadOperation(complexResponse)
@@ -73,7 +73,7 @@ internal class BleManagerGattWriteOperations(
                 null
             }
         } ?: run {
-            throw GoProException(GoProError.SEND_COMMAND_FAILED)
+            throw SimpleBleClientException(BleError.SEND_COMMAND_FAILED)
         }
     }
     //endregion

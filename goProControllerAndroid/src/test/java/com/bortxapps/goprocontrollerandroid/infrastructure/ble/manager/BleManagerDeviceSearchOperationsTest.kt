@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import app.cash.turbine.test
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.scanner.BleDeviceScannerManager
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -78,7 +78,7 @@ class BleManagerDeviceSearchOperationsTest {
 
         bleManagerDeviceConnection.getDevicesByService(serviceUUID)
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             bleManagerDeviceConnection.getDevicesByService(serviceUUID)
         }
     }

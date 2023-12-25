@@ -6,8 +6,8 @@ import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
@@ -70,7 +70,7 @@ class BleManagerGattConnectionOperationsTest {
         coEvery { bleManagerDeviceConnectionMock.getDetectedDevices() } returns mutableListOf(bluetoothDeviceMock)
 
 
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.connectToDevice(contextMock, "another_device_address", bleManagerGattCallBacks)
             }
@@ -123,7 +123,7 @@ class BleManagerGattConnectionOperationsTest {
             bluetoothGattMock
         }
 
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.connectToDevice(contextMock, goProAddress, bleManagerGattCallBacks)
             }
@@ -145,7 +145,7 @@ class BleManagerGattConnectionOperationsTest {
         }
 
         mutex.lock()
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.connectToDevice(contextMock, goProAddress, bleManagerGattCallBacks)
             }
@@ -164,7 +164,7 @@ class BleManagerGattConnectionOperationsTest {
 
         coEvery { bluetoothGattMock.disconnect() } just runs
 
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.disconnect(bluetoothGattMock)
             }
@@ -182,7 +182,7 @@ class BleManagerGattConnectionOperationsTest {
         coEvery { bluetoothGattMock.disconnect() } just runs
 
         mutex.lock()
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.disconnect(bluetoothGattMock)
             }
@@ -218,10 +218,10 @@ class BleManagerGattConnectionOperationsTest {
     }
 
     @Test
-    fun testFreeConnectionGattCloseFails_throwsException_expectGoProException() = runTest {
+    fun testFreeConnectionGattCloseFails_throwsException_expectSimpleBleClientException() = runTest {
         coEvery { bluetoothGattMock.close() } throws Exception()
 
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.disconnect(bluetoothGattMock)
             }
@@ -229,10 +229,10 @@ class BleManagerGattConnectionOperationsTest {
     }
 
     @Test
-    fun testFreeConnectionGattCloseFails_throwsGoProException_expectGoProException() = runTest {
+    fun testFreeConnectionGattCloseFails_throwsSimpleBleClientException_expectSimpleBleClientException() = runTest {
         coEvery { bluetoothGattMock.close() } throws Exception()
 
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.disconnect(bluetoothGattMock)
             }
@@ -251,7 +251,7 @@ class BleManagerGattConnectionOperationsTest {
 
         coEvery { bluetoothGattMock.discoverServices() } returns true
 
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.discoverServices(bluetoothGattMock)
             }
@@ -272,7 +272,7 @@ class BleManagerGattConnectionOperationsTest {
         }
 
         mutex.lock()
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattConnectionOperations.discoverServices(bluetoothGattMock)
             }

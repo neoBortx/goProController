@@ -6,9 +6,9 @@ import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import com.bortxapps.goprocontrollerandroid.utils.BuildVersionProvider
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -102,7 +102,7 @@ class BleManagerGattWriteOperationsTest {
     fun testSendData_GattNotInitialized_expectException() = runTest {
         
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, ByteArray(1), bluetoothGattMock, false)
             }
@@ -175,7 +175,7 @@ class BleManagerGattWriteOperationsTest {
             false
         }
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, value, bluetoothGattMock, false)
             }
@@ -197,7 +197,7 @@ class BleManagerGattWriteOperationsTest {
             BluetoothStatusCodes.FEATURE_NOT_SUPPORTED
         }
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, value, bluetoothGattMock, false)
             }
@@ -213,7 +213,7 @@ class BleManagerGattWriteOperationsTest {
             true
         }
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, value, bluetoothGattMock, false)
             }
@@ -232,7 +232,7 @@ class BleManagerGattWriteOperationsTest {
 
         mutex.lock()
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, value, bluetoothGattMock, false)
             }
@@ -245,7 +245,7 @@ class BleManagerGattWriteOperationsTest {
         
         coEvery { bluetoothGattMock.getService(serviceUUID)?.getCharacteristic(characteristicUUID) } returns null
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, value, bluetoothGattMock, false)
             }
@@ -259,7 +259,7 @@ class BleManagerGattWriteOperationsTest {
         
         every { bluetoothGattMock.writeCharacteristic(bluetoothCharacteristicMock) } throws Exception()
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattWriteOperations.sendData(serviceUUID, characteristicUUID, value, bluetoothGattMock, false)
             }

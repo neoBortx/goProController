@@ -1,8 +1,8 @@
 package com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils
 
 import android.util.Log
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleConfiguration
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.sync.Mutex
@@ -18,7 +18,7 @@ internal abstract class BleManagerGattOperationBase(
 
     protected suspend fun <T> launchGattOperation(operation: suspend () -> T): T {
 
-        val error: GoProError = try {
+        val error: BleError = try {
             return withTimeout(bleConfiguration.operationTimeoutMillis) {
                 gattMutex.withLock {
                     operation()
@@ -26,32 +26,32 @@ internal abstract class BleManagerGattOperationBase(
             }
         } catch (e: TimeoutCancellationException) {
             Log.e("BleManager", "launchGattOperation TIMEOUT ${e.message} ${e.stackTraceToString()}")
-            GoProError.CAMERA_NOT_RESPONDING
-        } catch (e: GoProException) {
-            e.goProError
+            BleError.BLE_DEVICE_NOT_RESPONDING
+        } catch (e: SimpleBleClientException) {
+            e.bleError
         } catch (e: Exception) {
             Log.e("BleManager", "launchGattOperation ERROR ${e.message} ${e.stackTraceToString()}")
-            GoProError.COMMUNICATION_FAILED
+            BleError.COMMUNICATION_FAILED
         }
 
-        throw GoProException(error)
+        throw SimpleBleClientException(error)
     }
 
     protected suspend fun <T> launchDeferredOperation(operation: suspend () -> T): T {
 
-        val error: GoProError = try {
+        val error: BleError = try {
             return operation()
         } catch (e: CancellationException) {
             Log.e("BleManager", "launchGattOperation Failed ${e.message} ${e.stackTraceToString()}")
-            GoProError.COMMUNICATION_FAILED
+            BleError.COMMUNICATION_FAILED
         } catch (e: UninitializedPropertyAccessException) {
             Log.e("BleManager", "launchGattOperation Failed ${e.message} ${e.stackTraceToString()}")
-            GoProError.INTERNAL_ERROR
+            BleError.INTERNAL_ERROR
         } catch (e: Exception) {
             Log.e("BleManager", "launchGattOperation Failed ${e.message} ${e.stackTraceToString()}")
-            GoProError.OTHER
+            BleError.OTHER
         }
 
-        throw GoProException(error)
+        throw SimpleBleClientException(error)
     }
 }

@@ -1,22 +1,22 @@
 package com.bortxapps.goprocontrollerandroid.feature.connection.api
 
 import android.content.Context
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManager
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.contracts.SimpleBleClient
 import java.util.UUID
 
-class ConnectionApi internal constructor(private val bleManager: BleManager) {
+class ConnectionApi internal constructor(private val bleClient: SimpleBleClient) {
     fun getNearByCameras(serviceUUID: UUID) =
-        bleManager.getDevicesByService(serviceUUID)
+        bleClient.getDevicesByService(serviceUUID)
 
-    fun stopSearch() = bleManager.stopSearchDevices()
+    fun stopSearch() = bleClient.stopSearchDevices()
 
     fun getPairedCameras(context: Context, deviceNamePrefix: String) =
-        bleManager.getPairedDevicesByPrefix(context, deviceNamePrefix)
+        bleClient.getPairedDevicesByPrefix(context, deviceNamePrefix)
 
     suspend fun connectToDevice(context: Context, address: String) =
-        bleManager.connectToDevice(context, address)
+        bleClient.connectToDevice(context, address)
 
-    fun subscribeToConnectionStatusChanges() = bleManager.subscribeToConnectionStatusChanges()
+    fun subscribeToConnectionStatusChanges() = bleClient.subscribeToConnectionStatusChanges()
 
-    suspend fun disconnectBle() = bleManager.disconnect()
+    suspend fun disconnectBle() = bleClient.disconnect()
 }

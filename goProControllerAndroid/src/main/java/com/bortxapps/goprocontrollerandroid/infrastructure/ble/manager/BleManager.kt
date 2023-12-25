@@ -2,9 +2,10 @@ package com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager
 
 import android.bluetooth.BluetoothGatt
 import android.content.Context
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.contracts.SimpleBleClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -12,14 +13,14 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-internal class BleManager private constructor(
+internal class BleManager (
     private val bleManagerDeviceConnection: BleManagerDeviceSearchOperations,
     private val bleManagerGattConnectionOperations: BleManagerGattConnectionOperations,
     private val bleManagerGattSubscriptions: BleManagerGattSubscriptions,
     private val bleManagerGattReadOperations: BleManagerGattReadOperations,
     private val bleManagerGattWriteOperations: BleManagerGattWriteOperations,
     private val bleManagerGattCallBacks: BleManagerGattCallBacks,
-) {
+) : SimpleBleClient {
 
     private var bluetoothGatt: BluetoothGatt? = null
 
@@ -33,53 +34,28 @@ internal class BleManager private constructor(
         }
     }
 
-    data class Builder(var operationTimeOutMillis: Long? = null) {
-        fun setOperationTimeOutMillis(timeout: Long) = apply { this.operationTimeOutMillis = timeout }
-        fun build(
-            bleManagerDeviceConnection: BleManagerDeviceSearchOperations,
-            bleManagerGattConnectionOperations: BleManagerGattConnectionOperations,
-            bleManagerGattSubscriptions: BleManagerGattSubscriptions,
-            bleManagerGattReadOperations: BleManagerGattReadOperations,
-            bleManagerGattWriteOperations: BleManagerGattWriteOperations,
-            bleManagerGattCallBacks: BleManagerGattCallBacks,
-            bleConfiguration: BleConfiguration
-        ): BleManager {
-
-            operationTimeOutMillis?.let { bleConfiguration.operationTimeoutMillis }
-
-            return BleManager(
-                bleManagerDeviceConnection,
-                bleManagerGattConnectionOperations,
-                bleManagerGattSubscriptions,
-                bleManagerGattReadOperations,
-                bleManagerGattWriteOperations,
-                bleManagerGattCallBacks,
-            )
-        }
-    }
-
     //region search devices
-    fun getDevicesByService(serviceUUID: UUID) =
+    override fun getDevicesByService(serviceUUID: UUID) =
         bleManagerDeviceConnection.getDevicesByService(serviceUUID)
 
-    fun getPairedDevicesByPrefix(context: Context, deviceNamePrefix: String) =
+    override fun getPairedDevicesByPrefix(context: Context, deviceNamePrefix: String) =
         bleManagerDeviceConnection.getPairedDevicesByPrefix(context, deviceNamePrefix)
 
-    fun stopSearchDevices() = bleManagerDeviceConnection.stopSearchDevices()
+    override fun stopSearchDevices() = bleManagerDeviceConnection.stopSearchDevices()
     //endregion
 
     //region connection
-    suspend fun connectToDevice(context: Context, address: String): Boolean {
+    override suspend fun connectToDevice(context: Context, address: String): Boolean {
         bleManagerGattConnectionOperations.connectToDevice(context, address, bleManagerGattCallBacks)?.let {
             bluetoothGatt = it
             if (bleManagerGattConnectionOperations.discoverServices(it)) {
                 bleManagerGattSubscriptions.subscribeToNotifications(it)
             }
-        } ?: throw GoProException(GoProError.CAMERA_NOT_CONNECTED)
+        } ?: throw SimpleBleClientException(BleError.CAMERA_NOT_CONNECTED)
         return true
     }
 
-    internal suspend fun disconnect() {
+    override suspend fun disconnect() {
         checkGatt()
         if (bleManagerGattConnectionOperations.disconnect(bluetoothGatt!!)) {
             freeResources()
@@ -94,15 +70,15 @@ internal class BleManager private constructor(
         }
     }
 
-    internal fun subscribeToConnectionStatusChanges() = bleManagerGattCallBacks.subscribeToConnectionStatusChanges()
+    override fun subscribeToConnectionStatusChanges() = bleManagerGattCallBacks.subscribeToConnectionStatusChanges()
     //endregion
 
     //region IO
-    suspend fun sendData(
+    override suspend fun sendData(
         serviceUUID: UUID,
         characteristicUUID: UUID,
         data: ByteArray,
-        complexResponse: Boolean = false
+        complexResponse: Boolean
     ): BleNetworkMessage {
         checkGatt()
         return bleManagerGattWriteOperations.sendData(
@@ -114,10 +90,10 @@ internal class BleManager private constructor(
         )
     }
 
-    suspend fun readData(
+    override suspend fun readData(
         serviceUUID: UUID,
         characteristicUUID: UUID,
-        complexResponse: Boolean = false
+        complexResponse: Boolean
     ): BleNetworkMessage {
         checkGatt()
         return bleManagerGattReadOperations.readData(
@@ -132,7 +108,7 @@ internal class BleManager private constructor(
     //region private methods
     private fun checkGatt() {
         if (bluetoothGatt == null) {
-            throw GoProException(GoProError.CAMERA_NOT_CONNECTED)
+            throw SimpleBleClientException(BleError.CAMERA_NOT_CONNECTED)
         }
     }
 

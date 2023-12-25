@@ -5,9 +5,9 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -66,7 +66,9 @@ class BleManagerTest {
     fun setUp() {
         MockKAnnotations.init(this)
         mutex = Mutex()
-        bleConfiguration = BleConfiguration()
+        bleConfiguration = BleConfiguration().apply {
+            operationTimeoutMillis = 20
+        }
 
         every { bluetoothDeviceMock.name } returns goProName
         every { bluetoothDeviceMock.address } returns goProAddress
@@ -80,17 +82,14 @@ class BleManagerTest {
         every { bleManagerGattCallBacksMock.subscribeToConnectionStatusChanges() } returns MutableStateFlow(BluetoothProfile.STATE_CONNECTED)
 
         bleManager = spyk(
-            BleManager.Builder()
-                .setOperationTimeOutMillis(20)
-                .build(
-                    bleManagerDeviceConnectionMock,
-                    bleManagerGattConnectionOperationsMock,
-                    bleManagerGattSubscriptionsMock,
-                    bleManagerGattReadOperationsMock,
-                    bleManagerGattWriteOperationsMock,
-                    bleManagerGattCallBacksMock,
-                    bleConfiguration
-                )
+            BleManager(
+                bleManagerDeviceConnectionMock,
+                bleManagerGattConnectionOperationsMock,
+                bleManagerGattSubscriptionsMock,
+                bleManagerGattReadOperationsMock,
+                bleManagerGattWriteOperationsMock,
+                bleManagerGattCallBacksMock
+            )
         )
     }
 
@@ -152,12 +151,12 @@ class BleManagerTest {
     }
 
     @Test
-    fun `connectToDevice returns null expect GoProException`() = runTest {
+    fun `connectToDevice returns null expect SimpleBleClientException`() = runTest {
         coEvery { bleManagerGattConnectionOperationsMock.connectToDevice(contextMock, goProAddress, bleManagerGattCallBacksMock) } returns null
         coEvery { bleManagerGattConnectionOperationsMock.discoverServices(bluetoothGattMock) } returns true
         coEvery { bleManagerGattSubscriptionsMock.subscribeToNotifications(bluetoothGattMock) } just runs
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManager.connectToDevice(contextMock, goProAddress)
             }
@@ -167,7 +166,7 @@ class BleManagerTest {
     }
 
     @Test
-    fun `connectToDevice and discoverServices fails expect GoProException`() = runTest {
+    fun `connectToDevice and discoverServices fails expect SimpleBleClientException`() = runTest {
         coEvery {
             bleManagerGattConnectionOperationsMock.connectToDevice(
                 contextMock,
@@ -191,7 +190,7 @@ class BleManagerTest {
     //region disconnect
     @Test
     fun `disconnect gatt not initialized expect exception`() {
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManager.disconnect()
             }
@@ -257,7 +256,7 @@ class BleManagerTest {
     @OptIn(ExperimentalUnsignedTypes::class)
     @Test
     fun `sendData gatt not initialized expect exception`() = runTest {
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManager.sendData(serviceUUID, characteristicUUID, value.toByteArray(), false)
             }
@@ -328,7 +327,7 @@ class BleManagerTest {
     //region readData
     @Test
     fun `readData gatt not initialized expect exception`() = runTest {
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManager.readData(serviceUUID, characteristicUUID, false)
             }

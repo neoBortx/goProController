@@ -6,8 +6,8 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.content.Context
 import android.util.Log
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.BleManagerGattOperationBase
 import kotlinx.coroutines.sync.Mutex
 
@@ -18,13 +18,13 @@ internal class BleManagerGattConnectionOperations(
     bleConfiguration: BleConfiguration
 ) : BleManagerGattOperationBase(gattMutex, bleConfiguration) {
 
-    internal suspend fun connectToDevice(context: Context, address: String, gattCallBacks: BluetoothGattCallback): BluetoothGatt? {
+    suspend fun connectToDevice(context: Context, address: String, gattCallBacks: BluetoothGattCallback): BluetoothGatt? {
 
         bleManagerDeviceSearchOperations.getDetectedDevices().firstOrNull { it.address == address }?.let {
             return connect(context, it, gattCallBacks)
         } ?: run {
-            Log.e("BleManager", "connectToDevice ${GoProError.CAMERA_NOT_FOUND}")
-            throw GoProException(GoProError.CAMERA_NOT_FOUND)
+            Log.e("BleManager", "connectToDevice ${BleError.BLE_DEVICE_NOT_FOUND}")
+            throw SimpleBleClientException(BleError.BLE_DEVICE_NOT_FOUND)
         }
     }
 
@@ -45,7 +45,7 @@ internal class BleManagerGattConnectionOperations(
     }
 
     @SuppressLint("MissingPermission")
-    internal suspend fun disconnect(
+    suspend fun disconnect(
         bluetoothGatt: BluetoothGatt,
     ): Boolean = launchGattOperation {
         bleManagerGattCallBacks.initDisconnectOperation()
@@ -58,7 +58,7 @@ internal class BleManagerGattConnectionOperations(
 
 
     @SuppressLint("MissingPermission")
-    internal suspend fun freeConnection(
+    suspend fun freeConnection(
         bluetoothGatt: BluetoothGatt,
     ) = launchGattOperation {
         bluetoothGatt.close()
@@ -66,7 +66,7 @@ internal class BleManagerGattConnectionOperations(
 
 
     @SuppressLint("MissingPermission")
-    internal suspend fun discoverServices(bluetoothGatt: BluetoothGatt): Boolean = launchGattOperation {
+    suspend fun discoverServices(bluetoothGatt: BluetoothGatt): Boolean = launchGattOperation {
         bleManagerGattCallBacks.initDiscoverServicesOperation()
         bluetoothGatt.discoverServices()
         launchDeferredOperation {

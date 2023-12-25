@@ -5,12 +5,12 @@ import android.content.Context
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
 import android.util.Log
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 
 internal fun checkBluetoothEnabled(context: Context) {
     if (context.getSystemService(BluetoothManager::class.java)?.adapter?.isEnabled == false) {
-        throw GoProException(GoProError.BLE_NOT_ENABLED)
+        throw SimpleBleClientException(BleError.BLE_NOT_ENABLED)
     }
 }
 
@@ -25,13 +25,13 @@ internal fun checkPermissionsOldApi(context: Context) =
 
 internal fun checkPermissions(context: Context) {
     if (checkPermissionsApiCodeS(context) || checkPermissionsOldApi(context)) {
-        throw GoProException(GoProError.MISSING_BLE_PERMISSIONS)
+        throw SimpleBleClientException(BleError.MISSING_BLE_PERMISSIONS)
     }
 }
 
 internal fun checkBleHardwareAvailable(context: Context) {
     if (!context.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_BLUETOOTH_LE)) {
-        throw GoProException(GoProError.BLE_NOT_SUPPORTED)
+        throw SimpleBleClientException(BleError.BLE_NOT_SUPPORTED)
     }
 }
 
@@ -41,11 +41,11 @@ internal suspend fun <T> launchBleOperationWithValidations(context: Context, act
         checkBluetoothEnabled(context)
         checkPermissions(context)
         action()
-    } catch (ex: GoProException) {
+    } catch (ex: SimpleBleClientException) {
         Log.e("RepositoryBaseBle", "launchBleOperationWithValidations error -> $ex - ${ex.stackTraceToString()}")
         Result.failure(ex)
     } catch (ex: Exception) {
         Log.e("RepositoryBaseBle", "launchBleOperationWithValidations error -> $ex - ${ex.stackTraceToString()}")
-        Result.failure(GoProException(GoProError.OTHER))
+        Result.failure(SimpleBleClientException(BleError.OTHER))
     }
 }

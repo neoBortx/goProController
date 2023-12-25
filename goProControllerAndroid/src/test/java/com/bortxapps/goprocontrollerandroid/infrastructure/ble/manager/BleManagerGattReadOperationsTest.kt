@@ -4,9 +4,9 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
@@ -85,7 +85,7 @@ class BleManagerGattReadOperationsTest {
     //region readData
     @Test
     fun testReadData_GattNotInitialized_expectException() = runTest {
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattReadOperations.readData(serviceUUID, characteristicUUID, bluetoothGattMock)
             }
@@ -112,7 +112,7 @@ class BleManagerGattReadOperationsTest {
         }
 
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattReadOperations.readData(serviceUUID, characteristicUUID, bluetoothGattMock)
             }
@@ -125,7 +125,7 @@ class BleManagerGattReadOperationsTest {
             true
         }
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattReadOperations.readData(serviceUUID, characteristicUUID, bluetoothGattMock)
             }
@@ -139,7 +139,7 @@ class BleManagerGattReadOperationsTest {
         }
 
         mutex.lock()
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattReadOperations.readData(serviceUUID, characteristicUUID, bluetoothGattMock)
             }
@@ -150,7 +150,7 @@ class BleManagerGattReadOperationsTest {
     fun testReadData_simpleData_NullCharacteristic_expectException() = runTest {
         coEvery { bluetoothGattMock.getService(serviceUUID)?.getCharacteristic(characteristicUUID) } returns null
 
-        Assert.assertThrows(GoProException::class.java) {
+        Assert.assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattReadOperations.readData(serviceUUID, characteristicUUID, bluetoothGattMock)
             }

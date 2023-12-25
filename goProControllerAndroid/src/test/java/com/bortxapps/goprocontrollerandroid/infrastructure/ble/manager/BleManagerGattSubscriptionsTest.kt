@@ -7,10 +7,10 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.BLE_DESCRIPTION_BASE_UUID
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessageProcessor
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import com.bortxapps.goprocontrollerandroid.utils.BuildVersionProvider
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -108,7 +108,7 @@ class BleManagerGattSubscriptionsTest {
             0
         }
 
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattSubscriptions.subscribeToNotifications(bluetoothGattMock)
             }
@@ -133,7 +133,7 @@ class BleManagerGattSubscriptionsTest {
                 0
             }
 
-            assertThrows(GoProException::class.java) {
+            assertThrows(SimpleBleClientException::class.java) {
                 runBlocking {
                     bleManagerGattSubscriptions.subscribeToNotifications(bluetoothGattMock)
                 }
@@ -251,7 +251,7 @@ class BleManagerGattSubscriptionsTest {
             coEvery { bluetoothGattMock.setCharacteristicNotification(bluetoothCharacteristicMock, true) } returns true
             coEvery { bluetoothGattMock.writeDescriptor(bleBluetoothGattDescriptorMock) } returns false
 
-            assertThrows(GoProException::class.java) {
+            assertThrows(SimpleBleClientException::class.java) {
                 runBlocking {
                     bleManagerGattSubscriptions.subscribeToNotifications(bluetoothGattMock)
                 }
@@ -309,7 +309,7 @@ class BleManagerGattSubscriptionsTest {
         coEvery { bluetoothGattMock.services } returns listOf(bluetoothGattServiceMock)
         coEvery { bluetoothGattMock.setCharacteristicNotification(bluetoothCharacteristicMock, true) } throws Exception()
 
-        assertThrows(GoProException::class.java) {
+        assertThrows(SimpleBleClientException::class.java) {
             runBlocking {
                 bleManagerGattSubscriptions.subscribeToNotifications(bluetoothGattMock)
             }

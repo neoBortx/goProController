@@ -15,5 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "goProControllerExample"
 include(":app")
-include(":goProController")
 include(":goProControllerAndroid")

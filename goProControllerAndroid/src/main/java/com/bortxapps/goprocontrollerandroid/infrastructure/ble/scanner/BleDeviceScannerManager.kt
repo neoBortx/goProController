@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.BluetoothLeScanner
 import android.util.Log
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -46,7 +46,7 @@ internal class BleDeviceScannerManager(
         val leScanCallback = configureScanCallback(onResult = {
             trySendBlocking(it)
         }, onFailure = {
-            close(GoProException(GoProError.CANNOT_START_SEARCHING_CAMERAS))
+            close(SimpleBleClientException(BleError.CANNOT_START_SEARCHING_DEVICES))
         })
 
         try {
@@ -58,7 +58,7 @@ internal class BleDeviceScannerManager(
 
         } catch (ex: Exception) {
             Log.e("BleManager", "Error starting scan ${ex.message} ${ex.stackTraceToString()}")
-            close(GoProException(GoProError.CANNOT_START_SEARCHING_CAMERAS))
+            close(SimpleBleClientException(BleError.CANNOT_START_SEARCHING_DEVICES))
         }
 
         bleScannerTimerHandler.schedule(scanPeriod) {

@@ -1,0 +1,3 @@
+package com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.contracts
+
+interface SimpleBleClient: SimpleBleClientDeviceSeeker, SimpleBleClientConnection, SimpleBleClientReader, SimpleBleClientWriter

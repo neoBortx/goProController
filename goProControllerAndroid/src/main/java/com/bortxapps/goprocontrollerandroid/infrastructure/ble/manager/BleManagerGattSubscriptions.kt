@@ -7,10 +7,10 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothStatusCodes
 import android.os.Build
 import android.util.Log
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
-import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.BLE_DESCRIPTION_BASE_UUID
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
+import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.BleManagerGattOperationBase
 import com.bortxapps.goprocontrollerandroid.utils.BuildVersionProvider
 import kotlinx.coroutines.Dispatchers.IO
@@ -25,7 +25,7 @@ internal class BleManagerGattSubscriptions(
     bleConfiguration: BleConfiguration
 ) : BleManagerGattOperationBase(gattMutex, bleConfiguration) {
 
-    internal suspend fun subscribeToNotifications(bluetoothGatt: BluetoothGatt) {
+    suspend fun subscribeToNotifications(bluetoothGatt: BluetoothGatt) {
         getNotifiableCharacteristics(bluetoothGatt).forEach { characteristic ->
             withContext(IO) {
                 launchGattOperation {
@@ -35,7 +35,7 @@ internal class BleManagerGattSubscriptions(
                             bleManagerGattCallBacks.waitForWrittenDescriptor()
                         }
                     } else {
-                        throw GoProException(GoProError.UNABLE_TO_SUBSCRIBE_TO_NOTIFICATIONS)
+                        throw SimpleBleClientException(BleError.UNABLE_TO_SUBSCRIBE_TO_NOTIFICATIONS)
                     }
 
                 }
@@ -65,7 +65,7 @@ internal class BleManagerGattSubscriptions(
             } ?: false
         } catch (ex: Exception) {
             Log.e("BleManager", "writeDescriptor ${ex.message} ${ex.stackTraceToString()}")
-            throw GoProException(GoProError.UNABLE_TO_SUBSCRIBE_TO_NOTIFICATIONS)
+            throw SimpleBleClientException(BleError.UNABLE_TO_SUBSCRIBE_TO_NOTIFICATIONS)
         }
 
     private fun filterCharacteristicForSubscriptions(properties: Int) =
