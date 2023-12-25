@@ -1,5 +1,6 @@
+package com.bortxapps.goprocontrollerandroid.feature.commands.customMappers
+
 import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
-import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapResolution
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProBleCommands
 import org.junit.Assert.assertEquals
 import org.junit.Test

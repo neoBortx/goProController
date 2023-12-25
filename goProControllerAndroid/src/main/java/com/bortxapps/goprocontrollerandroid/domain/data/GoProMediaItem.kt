@@ -3,6 +3,8 @@ package com.bortxapps.goprocontrollerandroid.domain.data
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.log10
+import kotlin.math.pow
 
 private const val BYTE_SIZE = 1024.0
 private const val SIZE_DIVIDER = 3
@@ -54,8 +56,8 @@ data class GoProMediaItem(
             return "0 Byte"
         }
 
-        val unitIndex = (Math.log10(fileSize.toDouble()) / SIZE_DIVIDER).toInt()
-        val sizeConverted = fileSize / Math.pow(BYTE_SIZE, unitIndex.toDouble())
+        val unitIndex = (log10(fileSize.toDouble()) / SIZE_DIVIDER).toInt()
+        val sizeConverted = fileSize / BYTE_SIZE.pow(unitIndex.toDouble())
 
         return String.format(Locale.getDefault(), "%.2f %s", sizeConverted, units[unitIndex])
     }

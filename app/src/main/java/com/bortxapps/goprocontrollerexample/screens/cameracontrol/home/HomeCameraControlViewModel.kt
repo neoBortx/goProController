@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class HomeCameraControlViewModel(val goProController: GoProController, savedStateHandle: SavedStateHandle) : ViewModel() {
+class HomeCameraControlViewModel(private val goProController: GoProController, savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private val _state: MutableStateFlow<CameraHomeScreenState> = MutableStateFlow(CameraHomeScreenState.Loading)
     val state: StateFlow<CameraHomeScreenState>

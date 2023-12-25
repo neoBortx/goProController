@@ -196,7 +196,7 @@ internal class CommandsApi internal constructor(private val bleManager: BleManag
         complexResponse = true
     )
 
-    suspend fun GetVideoPerformanceMode() = bleManager.sendData(
+    suspend fun getVideoPerformanceMode() = bleManager.sendData(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoPerformanceMode.byteArray,
@@ -273,7 +273,7 @@ internal class CommandsApi internal constructor(private val bleManager: BleManag
         complexResponse = true
     )
 
-    suspend fun getVideoMode_GoPro_12() = bleManager.sendData(
+    suspend fun getVideoModeGoPro12() = bleManager.sendData(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoModeGoPro12.byteArray,

@@ -39,7 +39,7 @@ class KtorClient(private var httpClient: HttpClient) {
         body: Serializable? = null
     ): HttpResponse = executeRequest {
         httpClient.post(GOPRO_BASE_URL) {
-            url() {
+            url {
                 appendPathSegments(path)
                 queryParams.forEach { (key, value) -> parameters.append(key, value) }
             }
@@ -60,7 +60,7 @@ class KtorClient(private var httpClient: HttpClient) {
         }
     }
 
-    private suspend inline fun <T> executeRequest(
+    private inline fun <T> executeRequest(
         action: () -> T,
     ): T {
         try {

@@ -16,7 +16,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItem
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItemType
-import com.bortxapps.goprocontrollerandroid.domain.data.GroupMediaItem
 import com.bortxapps.goprocontrollerexample.R
 import com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.CameraMediaScreenDialogState
 import com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.CameraMediaScreenState

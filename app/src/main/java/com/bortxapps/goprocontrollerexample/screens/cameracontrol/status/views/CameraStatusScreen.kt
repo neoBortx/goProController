@@ -1,7 +1,6 @@
 package com.bortxapps.goprocontrollerexample.screens.cameracontrol.status.views
 
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope

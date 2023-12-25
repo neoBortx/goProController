@@ -75,7 +75,7 @@ abstract class RepositoryBleBase(val context: Context) {
 
     }
 
-    fun <MAPPED> mapResponse(response: BleNetworkMessage, mapper: ((BleNetworkMessage) -> MAPPED)): MAPPED {
+    private fun <MAPPED> mapResponse(response: BleNetworkMessage, mapper: ((BleNetworkMessage) -> MAPPED)): MAPPED {
         return try {
             mapper(response)
         } catch (ex: GoProException) {

@@ -2,16 +2,10 @@ package com.bortxapps.goprocontrollerandroid.feature.commands.data
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
-import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class CameraStatusTest {
-
-    @Before
-    fun setUp() {
-
-    }
 
     //Just for test true / false converter
     @Test
@@ -21,7 +15,7 @@ class CameraStatusTest {
         val mockDataBatteryPresent = mapOf(
             CameraStatus.CameraStatusIds.INTERNAL_BATTERY_PRESENT.id.toUByte() to ubyteArrayOf(1.toUByte())
         )
-        val mockDataBatteryAbsent = mapOf<UByte, UByteArray>(
+        val mockDataBatteryAbsent = mapOf(
             CameraStatus.CameraStatusIds.INTERNAL_BATTERY_PRESENT.id.toUByte() to ubyteArrayOf(0.toUByte())
         )
 

@@ -1,6 +1,5 @@
 package com.bortxapps.goprocontrollerexample.screens.cameracontrol.media.views
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +28,6 @@ import coil.compose.AsyncImage
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProMediaItem
 import kotlinx.coroutines.async
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MediaItemsList(
     items: List<GoProMediaItem>,
