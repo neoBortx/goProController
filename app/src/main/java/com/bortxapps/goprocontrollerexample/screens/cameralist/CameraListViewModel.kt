@@ -84,6 +84,7 @@ class CameraListViewModel(private val goProController: GoProController) : ViewMo
     private fun processError(error: Throwable) {
         _state.value = CameraListScreenState.Error(error.message ?: "UNKNOWN")
         Log.e("ExampleViewModel", "Error -> $error")
+        Log.e("ExampleViewModel", "Error -> ${error.stackTraceToString()}")
     }
 
     private fun processOnCompletion(nearbyCameras: List<GoProCamera>) {

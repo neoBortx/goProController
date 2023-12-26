@@ -20,14 +20,14 @@ internal class BleDeviceScannerManager(
     private val scanner: BluetoothLeScanner,
     private val bleDeviceScannerSettingsBuilder: BleDeviceScannerSettingsBuilder,
     private val bleDeviceScannerFilterBuilder: BleDeviceScannerFilterBuilder,
-    private val bleDeviceScannerCallbackBuilder: BleDeviceScannerCallbackBuilder,
-    private val bleScannerTimerHandler: Timer = Timer()
+    private val bleDeviceScannerCallbackBuilder: BleDeviceScannerCallbackBuilder
 ) {
 
     companion object {
         private const val SCAN_PERIOD: Long = 10000
     }
 
+    private var bleScannerTimerHandler: Timer? = null
     private var onStopSearch: () -> Unit = {}
     private var stopSearchObservable = true
         set(value) {
@@ -61,16 +61,18 @@ internal class BleDeviceScannerManager(
             close(SimpleBleClientException(BleError.CANNOT_START_SEARCHING_DEVICES))
         }
 
-        bleScannerTimerHandler.schedule(scanPeriod) {
-            Log.d("BleManager", "Discovering time expired")
-            close()
+        bleScannerTimerHandler = Timer().also {
+            it.schedule(scanPeriod) {
+                Log.d("BleManager", "Discovering time expired")
+                close()
+            }
         }
 
 
         awaitClose {
             Log.d("BleManager", "awaitClose")
             scanner.stopScan(leScanCallback)
-            bleScannerTimerHandler.cancel()
+            bleScannerTimerHandler?.cancel()
             close()
         }
     }.flowOn(Dispatchers.IO)
