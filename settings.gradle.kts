@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 rootProject.name = "goProControllerExample"
 include(":app")
 include(":goProControllerAndroid")
+include(":simpleBleClient")

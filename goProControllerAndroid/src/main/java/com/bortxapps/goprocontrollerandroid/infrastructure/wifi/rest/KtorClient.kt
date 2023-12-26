@@ -3,8 +3,8 @@ package com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest
 import android.util.Log
 import com.bortxapps.goprocontrollerandroid.feature.GOPRO_BASE_URL
 import com.bortxapps.goprocontrollerandroid.feature.GOPRO_MEDIA_PATH
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.BleError
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
+import com.bortxapps.simplebleclient.exceptions.BleError
+import com.bortxapps.simplebleclient.exceptions.SimpleBleClientException
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.post

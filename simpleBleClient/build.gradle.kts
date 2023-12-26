@@ -2,15 +2,14 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
-    alias(libs.plugins.kotlin.plugin.serialization)
 }
 
 android {
-    namespace = "com.bortxapps.goprocontrollerandroid"
+    namespace = "com.bortxapps.simplebleclient"
     compileSdk = 33
 
     defaultConfig {
-        minSdk = 29
+        minSdk = 26
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -19,10 +18,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
@@ -32,7 +28,6 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-
 }
 
 dependencies {
@@ -40,20 +35,11 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
-
-    // KTOR
-    implementation(libs.ktor.client)
-    implementation(libs.ktor.client.resources)
-    implementation(libs.ktor.client.serialization)
-    implementation(libs.ktor.client.logging)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.kotlinx.serialization)
-
-    // Arrow
-    implementation(libs.arrow.core)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 
     implementation(libs.kotlinx.coroutines.android)
-    implementation(project(":simpleBleClient"))
 
     // Testing
     testImplementation(libs.junit)

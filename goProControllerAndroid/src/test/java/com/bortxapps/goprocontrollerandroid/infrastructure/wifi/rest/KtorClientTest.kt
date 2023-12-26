@@ -1,8 +1,8 @@
 package com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest
 
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.exceptions.SimpleBleClientException
 import com.bortxapps.goprocontrollerandroid.utils.mockHttp.createHttpMockClient
 import com.bortxapps.goprocontrollerandroid.utils.mockHttp.createMockHttpClientException
+import com.bortxapps.simplebleclient.exceptions.SimpleBleClientException
 import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.request
 import io.ktor.http.HttpStatusCode

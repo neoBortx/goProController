@@ -10,7 +10,7 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapRe
 import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapSpeedToMessage
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProBleCommands
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.contracts.SimpleBleClient
+import com.bortxapps.simplebleclient.manager.contracts.SimpleBleClient
 
 internal class CommandsApi internal constructor(private val bleClient: SimpleBleClient) {
 

@@ -11,12 +11,8 @@ import com.bortxapps.goprocontrollerandroid.domain.data.Speed
 import com.bortxapps.goprocontrollerandroid.feature.commands.api.CommandsApi
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.CameraStatus
 import com.bortxapps.goprocontrollerandroid.feature.commands.decoder.decodeMessageAsMap
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkBleHardwareAvailable
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkBluetoothEnabled
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkPermissions
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkPermissionsApiCodeS
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkPermissionsOldApi
+import com.bortxapps.simplebleclient.data.BleNetworkMessage
+
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -41,14 +37,9 @@ class GoProCommandsImplTest {
 
     @Before
     fun setUp() {
-        mockkStatic(::checkBluetoothEnabled)
-        mockkStatic(::checkPermissionsApiCodeS)
-        mockkStatic(::checkPermissionsOldApi)
-        mockkStatic(::checkPermissions)
-        mockkStatic(::checkBleHardwareAvailable)
+
         mockkStatic(CameraStatus::class)
         mockkStatic(::decodeMessageAsMap)
-        mockValidationsAllOk()
         goProCommandsImpl = GoProCommandsImpl(mockedContext, mockedApi)
     }
 
@@ -344,10 +335,6 @@ class GoProCommandsImplTest {
         assertEquals(result, goProCommandsImpl.getCameraStatus().getOrNull())
     }
 
-    private fun mockValidationsAllOk() {
-        coEvery { checkBluetoothEnabled(any()) } returns Unit
-        coEvery { checkPermissions(any()) } returns Unit
-        coEvery { checkBleHardwareAvailable(any()) } returns Unit
-    }
+
 
 }

@@ -12,7 +12,6 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.feature.connection.api.ConnectionApi
 import com.bortxapps.goprocontrollerandroid.feature.connection.mapper.goProBleConnectionStateMapper
 import com.bortxapps.goprocontrollerandroid.feature.connection.mapper.toMapCamera
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.launchBleOperationWithValidations
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -21,45 +20,40 @@ class GoProConnectorImpl(
     private val api: ConnectionApi
 ) : RepositoryBleBase(context), GoProConnector {
 
-    override suspend fun getNearByCameras(): Result<Flow<GoProCamera>> =
-        launchBleOperationWithValidations(context) {
-            Result.success(api.getNearByCameras(GoProUUID.SERVICE_UUID.uuid).map {
-                it.toMapCamera()
-            })
-        }
-
-
-    override suspend fun stopSearch(): Result<Boolean> = launchBleOperationWithValidations(context) {
-        api.stopSearch()
-        Result.success(true)
-    }
-
-    override suspend fun getCamerasPaired() = launchBleOperationWithValidations(context) {
-        Result.success(api.getPairedCameras(context, GOPRO_NAME_PREFIX).map {
+    override suspend fun getNearByCameras(): Result<Flow<GoProCamera>> {
+        return Result.success(api.getNearByCameras(GoProUUID.SERVICE_UUID.uuid).map {
             it.toMapCamera()
         })
     }
 
-    override suspend fun connectToDevice(address: String): Result<Boolean> =
-        launchBleOperationWithValidations(context) {
-            try {
-                if (api.connectToDevice(context, address)) {
-                    Result.success(true)
-                } else {
-                    Result.failure(GoProException(GoProError.OTHER))
-                }
-            } catch (e: GoProException) {
-                Result.failure(e)
-            } catch (e: Exception) {
-                Log.e("BleManager", "connectToDevice ${e.message} ${e.stackTraceToString()}")
-                Result.failure(GoProException(GoProError.OTHER))
-            }
 
+    override suspend fun stopSearch(): Result<Boolean> {
+        api.stopSearch()
+        return Result.success(true)
+    }
+
+    override suspend fun getCamerasPaired(): Result<List<GoProCamera>> {
+        return Result.success(api.getPairedCameras(context, GOPRO_NAME_PREFIX).map {
+            it.toMapCamera()
+        })
+    }
+
+    override suspend fun connectToDevice(address: String): Result<Boolean> = try {
+        if (api.connectToDevice(context, address)) {
+            Result.success(true)
+        } else {
+            Result.failure(GoProException(GoProError.OTHER))
         }
+    } catch (e: GoProException) {
+        Result.failure(e)
+    } catch (e: Exception) {
+        Log.e("BleManager", "connectToDevice ${e.message} ${e.stackTraceToString()}")
+        Result.failure(GoProException(GoProError.OTHER))
+    }
 
-    override suspend fun disconnectBle() = launchBleOperationWithValidations(context) {
+    override suspend fun disconnectBle(): Result<Boolean> {
         api.disconnectBle()
-        Result.success(true)
+        return Result.success(true)
     }
 
     override suspend fun subscribeToBleConnectionStatusChanges() = api.subscribeToConnectionStatusChanges().map {

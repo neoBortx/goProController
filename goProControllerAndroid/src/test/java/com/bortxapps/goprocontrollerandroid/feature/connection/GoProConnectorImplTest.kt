@@ -11,17 +11,11 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.data.GOPRO_NAME_PRE
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.feature.connection.api.ConnectionApi
 import com.bortxapps.goprocontrollerandroid.feature.connection.mapper.toMapCamera
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkBleHardwareAvailable
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkBluetoothEnabled
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkPermissions
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkPermissionsApiCodeS
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.checkPermissionsOldApi
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.runs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -40,20 +34,8 @@ class GoProConnectorImplTest {
 
     @Before
     fun setUp() {
-        mockkStatic(::checkBluetoothEnabled)
-        mockkStatic(::checkPermissionsApiCodeS)
-        mockkStatic(::checkPermissionsOldApi)
-        mockkStatic(::checkPermissions)
-        mockkStatic(::checkBleHardwareAvailable)
-
-        coEvery { checkBluetoothEnabled(any()) } returns Unit
-        coEvery { checkPermissions(any()) } returns Unit
-        coEvery { checkBleHardwareAvailable(any()) } returns Unit
-
         api = mockk(relaxed = true)
         connector = GoProConnectorImpl(context, api)
-
-
     }
 
     @Test

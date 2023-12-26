@@ -4,8 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.utils.launchBleOperationWithValidations
+import com.bortxapps.simplebleclient.data.BleNetworkMessage
 import java.util.Locale
 
 abstract class RepositoryBleBase(val context: Context) {
@@ -14,9 +13,9 @@ abstract class RepositoryBleBase(val context: Context) {
     suspend fun <MAPPED> launchReadRequest(
         request: suspend () -> BleNetworkMessage,
         customMapper: ((BleNetworkMessage) -> MAPPED)
-    ): Result<MAPPED> = launchBleOperationWithValidations(context) {
+    ): Result<MAPPED>  {
         val requestLog = request.javaClass.enclosingMethod?.name ?: "Unknown"
-        Log.d("RepositoryBaseBle", "launchReadRequest request -> $requestLog")
+
         request().let { response ->
             Log.d(
                 "RepositoryBaseBle",
@@ -26,7 +25,7 @@ abstract class RepositoryBleBase(val context: Context) {
             )
             val mapped: MAPPED = mapResponse(response, customMapper)
             Log.d("RepositoryBaseBle", "launchReadRequest mapped -> $requestLog : $mapped")
-            Result.success(mapped)
+           return Result.success(mapped)
         }
     }
 
@@ -34,13 +33,13 @@ abstract class RepositoryBleBase(val context: Context) {
     suspend fun launchSimpleWriteRequest(
         request: suspend () -> BleNetworkMessage,
         responseValidator: ((BleNetworkMessage) -> Boolean)? = null
-    ): Result<Boolean> = launchBleOperationWithValidations(context) {
+    ): Result<Boolean> {
         Log.d(
             "RepositoryBaseBle",
             "launchSimpleWriteRequest request -> ${request.javaClass.enclosingMethod?.name ?: "Unknown"}"
         )
         request().let { response ->
-            if (responseValidator?.invoke(response) == true) {
+            return if (responseValidator?.invoke(response) == true) {
                 Result.success(true)
             } else {
                 Log.e("RepositoryBaseBle", "Write operation rejected because ${response.data.last()}")
@@ -53,11 +52,11 @@ abstract class RepositoryBleBase(val context: Context) {
     suspend fun <MAPPED> launchComplexWriteRequest(
         request: suspend () -> BleNetworkMessage?,
         customMapper: ((BleNetworkMessage) -> MAPPED)
-    ): Result<MAPPED> = launchBleOperationWithValidations(context) {
+    ): Result<MAPPED> {
         val requestLog = request.javaClass.enclosingMethod?.name ?: "Unknown"
         Log.d("RepositoryBaseBle", "launchComplexWriteRequest request -> $requestLog")
-        request()?.let { response ->
-            try {
+        return request()?.let { response ->
+            return try {
                 Log.d(
                     "RepositoryBaseBle",
                     "launchComplexWriteRequest response -> $requestLog : ${response.id}, ${response.status}, ${

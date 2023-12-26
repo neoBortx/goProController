@@ -1,7 +1,7 @@
 package com.bortxapps.goprocontrollerandroid.feature.commands.decoder
 
 import android.util.Log
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.data.BleNetworkMessage
+import com.bortxapps.simplebleclient.data.BleNetworkMessage
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

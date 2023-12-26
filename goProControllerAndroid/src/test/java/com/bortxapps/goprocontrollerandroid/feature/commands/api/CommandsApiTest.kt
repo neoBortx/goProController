@@ -6,7 +6,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
 import com.bortxapps.goprocontrollerandroid.domain.data.Speed
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProBleCommands
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManager
+import com.bortxapps.simplebleclient.manager.contracts.SimpleBleClient
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -15,7 +15,7 @@ import org.junit.Test
 
 class CommandsApiTest {
 
-    private lateinit var bleManager: BleManager
+    private lateinit var bleManager: SimpleBleClient
     private lateinit var commandsApi: CommandsApi
 
     @Before

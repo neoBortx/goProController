@@ -1,18 +1,19 @@
 package com.bortxapps.goprocontrollerandroid.feature.connection.api
 
 import android.content.Context
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.manager.BleManager
+import com.bortxapps.simplebleclient.manager.contracts.SimpleBleClient
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import java.util.UUID
 
 class ConnectionApiTest {
 
-    private lateinit var bleManager: BleManager
+    private lateinit var bleManager: SimpleBleClient
     private lateinit var connectionApi: ConnectionApi
     private lateinit var context: Context
     private val serviceUUID = UUID.randomUUID()
@@ -27,24 +28,24 @@ class ConnectionApiTest {
     }
 
     @Test
-    fun getNearByCameras_callsBleManager() {
+    fun getNearByCameras_callsBleManager() = runTest {
         connectionApi.getNearByCameras(serviceUUID)
 
-        verify { bleManager.getDevicesByService(serviceUUID) }
+        coVerify { bleManager.getDevicesByService(serviceUUID) }
     }
 
     @Test
-    fun stopSearch_callsBleManager() {
+    fun stopSearch_callsBleManager() = runTest  {
         connectionApi.stopSearch()
 
-        verify { bleManager.stopSearchDevices() }
+        coVerify { bleManager.stopSearchDevices() }
     }
 
     @Test
-    fun getPairedCameras_callsBleManager() {
+    fun getPairedCameras_callsBleManager() = runTest  {
         connectionApi.getPairedCameras(context, deviceNamePrefix)
 
-        verify { bleManager.getPairedDevicesByPrefix(context, deviceNamePrefix) }
+        coVerify { bleManager.getPairedDevicesByPrefix(context, deviceNamePrefix) }
     }
 
     @Test

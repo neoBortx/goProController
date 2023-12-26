@@ -10,10 +10,10 @@ import com.bortxapps.goprocontrollerandroid.feature.connection.GoProConnectorImp
 import com.bortxapps.goprocontrollerandroid.feature.connection.api.ConnectionApi
 import com.bortxapps.goprocontrollerandroid.feature.media.GoProMediaImpl
 import com.bortxapps.goprocontrollerandroid.feature.media.api.MediaApi
-import com.bortxapps.goprocontrollerandroid.infrastructure.ble.api.SimpleBleClientBuilder
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.manager.WifiManager
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest.KtorClient
 import com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest.getKtorHttpClient
+import com.bortxapps.simplebleclient.api.SimpleBleClientBuilder
 
 internal class LibraryContainer(context: Context) {
 
