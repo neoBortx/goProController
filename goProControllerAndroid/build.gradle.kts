@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.bortxapps.goprocontrollerandroid"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 29
@@ -48,12 +48,14 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.kotlinx.serialization)
+    implementation(libs.simpleBleClient)
 
     // Arrow
     implementation(libs.arrow.core)
 
     implementation(libs.kotlinx.coroutines.android)
-    implementation(project(":simpleBleClient"))
+
+    //implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
 
     // Testing
     testImplementation(libs.junit)
@@ -63,4 +65,6 @@ dependencies {
     testImplementation(libs.ktor.client.mock)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockwebserver)
+
+
 }

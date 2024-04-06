@@ -10,348 +10,350 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapRe
 import com.bortxapps.goprocontrollerandroid.feature.commands.customMappers.mapSpeedToMessage
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProBleCommands
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
-import com.bortxapps.simplebleclient.manager.contracts.SimpleBleClient
+import com.bortxapps.simplebleclient.api.contracts.SimpleBleClient
 
 internal class CommandsApi internal constructor(private val bleClient: SimpleBleClient) {
 
+    fun subscribeToCameraSettingsChanges() =
+        bleClient.subscription.subscribeToIncomeMessages()
+
     suspend fun getWifiApSSID() =
-        bleClient.readData(GoProUUID.WIFI_AP_SERVICE.uuid, GoProUUID.WIFI_AP_SSID.uuid)
+        bleClient.reader.readData(GoProUUID.WIFI_AP_SERVICE.uuid, GoProUUID.WIFI_AP_SSID.uuid)
 
     suspend fun getWifiApPassword() =
-        bleClient.readData(GoProUUID.WIFI_AP_SERVICE.uuid, GoProUUID.WIFI_AP_PASSWORD.uuid)
+        bleClient.reader.readData(GoProUUID.WIFI_AP_SERVICE.uuid, GoProUUID.WIFI_AP_PASSWORD.uuid)
 
     suspend fun enableWifiAp() =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.EnableWifi.byteArray
         )
 
     suspend fun disableWifiAp() =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.DisableWifi.byteArray
         )
 
     suspend fun setPresetsVideo() =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.SetPresetsVideo.byteArray
         )
 
     suspend fun setShutterOff() =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.SetShutterOff.byteArray
         )
 
     suspend fun setShutterOn() =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.SetShutterOn.byteArray
         )
 
     suspend fun setPresetsPhoto() =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.SetPresetsPhoto.byteArray
         )
 
     suspend fun setPresetsTimeLapse() =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_COMMAND.uuid,
             GoProBleCommands.SetPresetsTimeLapse.byteArray
         )
 
-    suspend fun getOpenGoProVersion() = bleClient.sendData(
+    suspend fun getOpenGoProVersion() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_COMMAND.uuid,
         GoProBleCommands.GetOpenGoProVersion.byteArray
     )
 
     //region query settings
-    suspend fun getCameraStatus() = bleClient.sendData(
+    suspend fun getCameraStatus() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetCameraStatus.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getResolution() = bleClient.sendData(
+    suspend fun getResolution() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetResolution.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getFrameRate() = bleClient.sendData(
+    suspend fun getFrameRate() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetFrameRate.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getAutoPowerDown() = bleClient.sendData(
+    suspend fun getAutoPowerDown() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetAutoPowerDown.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getAspectRatio() = bleClient.sendData(
+    suspend fun getAspectRatio() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetAspectRatio.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getVideoLapseDigitalLenses() = bleClient.sendData(
+    suspend fun getVideoLapseDigitalLenses() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoLapseDigitalLenses.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getPhotoLapseDigitalLenses() = bleClient.sendData(
+    suspend fun getPhotoLapseDigitalLenses() = bleClient.writer.sendDataWithResponse(
 
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetPhotoLapseDigitalLenses.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getTimeLapseDigitalLenses() = bleClient.sendData(
+    suspend fun getTimeLapseDigitalLenses() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetTimeLapseDigitalLenses.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getMediaFormat() = bleClient.sendData(
+    suspend fun getMediaFormat() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetMediaFormat.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getAntiFlicker() = bleClient.sendData(
+    suspend fun getAntiFlicker() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetAntiFlicker.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getHyperSmooth() = bleClient.sendData(
+    suspend fun getHyperSmooth() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetHyperSmooth.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getPresets() = bleClient.sendData(
+    suspend fun getPresets() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetActivePresetGroup.byteArray,
-        complexResponse = true
     )
 
-    suspend fun getHorizonLeveling() = bleClient.sendData(
+    suspend fun getHorizonLeveling() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetHorizonLeveling.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getMaxLens() = bleClient.sendData(
+    suspend fun getMaxLens() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetMaxLens.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getHindsight() = bleClient.sendData(
+    suspend fun getHindsight() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetHindsight.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getInterval() = bleClient.sendData(
+    suspend fun getInterval() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetInterval.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getDuration() = bleClient.sendData(
+    suspend fun getDuration() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetDuration.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getVideoPerformanceMode() = bleClient.sendData(
+    suspend fun getVideoPerformanceMode() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoPerformanceMode.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getControls() = bleClient.sendData(
+    suspend fun getControls() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetControls.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getSpeed() = bleClient.sendData(
+    suspend fun getSpeed() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetSpeed.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getNightPhoto() = bleClient.sendData(
+    suspend fun getNightPhoto() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetNightPhoto.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getWirelessBand() = bleClient.sendData(
+    suspend fun getWirelessBand() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetWirelessBand.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getTrailLength() = bleClient.sendData(
+    suspend fun getTrailLength() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetTrailLength.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getVideoMode() = bleClient.sendData(
+    suspend fun getVideoMode() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoMode.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getVideoModeBitRate() = bleClient.sendData(
+    suspend fun getVideoModeBitRate() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoModeBitRate.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getVideoModeBitDepth() = bleClient.sendData(
+    suspend fun getVideoModeBitDepth() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoModeBitDepth.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getVideoModeProfiles() = bleClient.sendData(
+    suspend fun getVideoModeProfiles() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoModeProfiles.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getVideoModeAspectRatio() = bleClient.sendData(
+    suspend fun getVideoModeAspectRatio() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoModeAspectRatio.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getVideoModeGoPro12() = bleClient.sendData(
+    suspend fun getVideoModeGoPro12() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetVideoModeGoPro12.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getLapseMode() = bleClient.sendData(
+    suspend fun getLapseMode() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetLapseMode.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getLapseModeAspectRatio() = bleClient.sendData(
+    suspend fun getLapseModeAspectRatio() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetLapseModeAspectRatio.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getLapseModeMaxLensMod() = bleClient.sendData(
+    suspend fun getLapseModeMaxLensMod() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetLapseModeMaxLensMod.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getLapseModeMaxLensModEnabled() = bleClient.sendData(
+    suspend fun getLapseModeMaxLensModEnabled() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetLapseModeMaxLensModEnabled.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getPhotoMode() = bleClient.sendData(
+    suspend fun getPhotoMode() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetPhotoMode.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getPhotoModeAspectRatio() = bleClient.sendData(
+    suspend fun getPhotoModeAspectRatio() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetPhotoModeAspectRatio.byteArray,
-        complexResponse = true
+
     )
 
-    suspend fun getFraming() = bleClient.sendData(
+    suspend fun getFraming() = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_QUERY.uuid,
         GoProBleCommands.GetFraming.byteArray,
-        complexResponse = true
+
     )
     //endregion
 
     suspend fun setResolution(resolution: Resolution) =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_SETTING.uuid,
             mapResolutionToMessage(resolution)
         )
 
     suspend fun setFrameRate(frameRate: FrameRate) =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_SETTING.uuid,
             mapFrameRateToMessage(frameRate)
         )
 
     suspend fun setHyperSmooth(hyperSmooth: HyperSmooth) =
-        bleClient.sendData(
+        bleClient.writer.sendDataWithResponse(
             GoProUUID.SERVICE_UUID.uuid,
             GoProUUID.CQ_SETTING.uuid,
             mapHyperSmoothToMessage(hyperSmooth)
         )
 
-    suspend fun setSpeed(speed: Speed) = bleClient.sendData(
+    suspend fun setSpeed(speed: Speed) = bleClient.writer.sendDataWithResponse(
         GoProUUID.SERVICE_UUID.uuid,
         GoProUUID.CQ_SETTING.uuid,
         mapSpeedToMessage(speed)

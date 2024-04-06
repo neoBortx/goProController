@@ -1,10 +1,10 @@
 package com.bortxapps.goprocontrollerandroid.infrastructure.wifi.rest
 
 import android.util.Log
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.GOPRO_BASE_URL
 import com.bortxapps.goprocontrollerandroid.feature.GOPRO_MEDIA_PATH
-import com.bortxapps.simplebleclient.exceptions.BleError
-import com.bortxapps.simplebleclient.exceptions.SimpleBleClientException
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -67,10 +67,10 @@ class KtorClient(private var httpClient: HttpClient) {
             return action()
         } catch (ex: SocketException) {
             Log.e("KtorClient", "Error: ${ex.message} ${ex.stackTraceToString()}")
-            throw SimpleBleClientException(BleError.COMMUNICATION_FAILED)
+            throw GoProException(GoProError.COMMUNICATION_FAILED)
         } catch (ex: Exception) {
             Log.e("KtorClient", "Error: ${ex.message} ${ex.stackTraceToString()}")
-            throw SimpleBleClientException(BleError.OTHER)
+            throw GoProException(GoProError.OTHER)
         }
     }
 }

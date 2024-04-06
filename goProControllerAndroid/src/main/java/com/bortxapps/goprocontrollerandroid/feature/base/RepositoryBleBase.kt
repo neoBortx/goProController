@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
-import com.bortxapps.simplebleclient.data.BleNetworkMessage
-import java.util.Locale
+import com.bortxapps.simplebleclient.api.data.BleNetworkMessage
+
 
 abstract class RepositoryBleBase(val context: Context) {
 
@@ -13,19 +13,12 @@ abstract class RepositoryBleBase(val context: Context) {
     suspend fun <MAPPED> launchReadRequest(
         request: suspend () -> BleNetworkMessage,
         customMapper: ((BleNetworkMessage) -> MAPPED)
-    ): Result<MAPPED>  {
+    ): Result<MAPPED> {
         val requestLog = request.javaClass.enclosingMethod?.name ?: "Unknown"
-
         request().let { response ->
-            Log.d(
-                "RepositoryBaseBle",
-                "launchReadRequest response -> $requestLog : ${response.id}, ${response.status}, ${
-                    response.data.toByteArray().joinToString(separator = ":") { String.format(Locale.getDefault(), "%02X", it) }
-                }}"
-            )
             val mapped: MAPPED = mapResponse(response, customMapper)
             Log.d("RepositoryBaseBle", "launchReadRequest mapped -> $requestLog : $mapped")
-           return Result.success(mapped)
+            return Result.success(mapped)
         }
     }
 
@@ -34,10 +27,6 @@ abstract class RepositoryBleBase(val context: Context) {
         request: suspend () -> BleNetworkMessage,
         responseValidator: ((BleNetworkMessage) -> Boolean)? = null
     ): Result<Boolean> {
-        Log.d(
-            "RepositoryBaseBle",
-            "launchSimpleWriteRequest request -> ${request.javaClass.enclosingMethod?.name ?: "Unknown"}"
-        )
         request().let { response ->
             return if (responseValidator?.invoke(response) == true) {
                 Result.success(true)
@@ -48,21 +37,13 @@ abstract class RepositoryBleBase(val context: Context) {
         }
     }
 
-    @OptIn(ExperimentalUnsignedTypes::class)
     suspend fun <MAPPED> launchComplexWriteRequest(
         request: suspend () -> BleNetworkMessage?,
         customMapper: ((BleNetworkMessage) -> MAPPED)
     ): Result<MAPPED> {
         val requestLog = request.javaClass.enclosingMethod?.name ?: "Unknown"
-        Log.d("RepositoryBaseBle", "launchComplexWriteRequest request -> $requestLog")
         return request()?.let { response ->
             return try {
-                Log.d(
-                    "RepositoryBaseBle",
-                    "launchComplexWriteRequest response -> $requestLog : ${response.id}, ${response.status}, ${
-                        response.data.toByteArray().joinToString(separator = ":") { String.format(Locale.getDefault(), "%02X", it) }
-                    }"
-                )
                 val mapped: MAPPED = mapResponse(response, customMapper)
                 Log.d("RepositoryBaseBle", "launchComplexWriteRequest mapped -> $requestLog : $mapped")
                 Result.success(mapped)
@@ -87,5 +68,5 @@ abstract class RepositoryBleBase(val context: Context) {
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    protected fun validateSimpleWriteResponse(response: BleNetworkMessage) = response.data.last() == 0.toUByte()
+    protected fun validateSimpleWriteResponse(response: BleNetworkMessage) = response.data.last() == 0x00.toByte()
 }

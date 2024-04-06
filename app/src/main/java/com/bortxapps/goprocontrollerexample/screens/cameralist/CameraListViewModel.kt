@@ -50,26 +50,29 @@ class CameraListViewModel(private val goProController: GoProController) : ViewMo
     }
 
     private fun getCamerasNearby() = viewModelScope.launch {
-        withContext(Dispatchers.IO) {
-            Log.d("ExampleViewModel", "getCamerasNearby")
-            val nearbyCameras = mutableStateListOf<GoProCamera>()
+        try {
+            withContext(Dispatchers.IO) {
+                Log.d("ExampleViewModel", "getCamerasNearby")
+                val nearbyCameras = mutableStateListOf<GoProCamera>()
 
-            _state.value = CameraListScreenState.Loading(nearbyCameras)
+                _state.value = CameraListScreenState.Loading(nearbyCameras)
 
-            val paired = goProController.getCamerasPaired().getOrNull().orEmpty()
+                val paired = goProController.getCamerasPaired().getOrNull().orEmpty()
 
-            goProController.getNearByCameras().onSuccess {
-                it.onStart { _state.update { CameraListScreenState.Loading(nearbyCameras) } }
-                    .filter { camera -> nearbyCameras.none { nearCamera -> nearCamera.address == camera.address } }
-                    .map { camera -> camera.copy(pairedState = mapToPairedState(camera, paired)) }
-                    .onEach { cam -> _state.update { CameraListScreenState.Loading(nearbyCameras.apply { add(cam) }) } }
-                    .onCompletion { processOnCompletion(nearbyCameras) }
-                    .catch { error -> processError(error) }
-                    .launchIn(viewModelScope)
-            }.onFailure { error ->
-                _state.update { CameraListScreenState.Error(error.message ?: "UNKNOWN") }
+                goProController.getNearByCameras().onSuccess {
+                    it.onStart { _state.update { CameraListScreenState.Loading(nearbyCameras) } }
+                        .filter { camera -> nearbyCameras.none { nearCamera -> nearCamera.address == camera.address } }
+                        .map { camera -> camera.copy(pairedState = mapToPairedState(camera, paired)) }
+                        .onEach { cam -> _state.update { CameraListScreenState.Loading(nearbyCameras.apply { add(cam) }) } }
+                        .onCompletion { processOnCompletion(nearbyCameras) }
+                        .catch { error -> processError(error) }
+                        .launchIn(viewModelScope)
+                }.onFailure { error ->
+                    _state.update { CameraListScreenState.Error(error.message ?: "UNKNOWN") }
+                }
             }
-
+        } catch (e: Exception) {
+            _state.value = CameraListScreenState.Error(e.message ?: "UNKNOWN")
         }
     }
 

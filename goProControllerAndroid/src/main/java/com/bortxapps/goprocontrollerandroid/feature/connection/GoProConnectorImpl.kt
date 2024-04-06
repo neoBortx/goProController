@@ -7,11 +7,13 @@ import com.bortxapps.goprocontrollerandroid.domain.data.GoProCamera
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProError
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProException
 import com.bortxapps.goprocontrollerandroid.feature.base.RepositoryBleBase
+import com.bortxapps.goprocontrollerandroid.feature.base.mappers.mapBleException
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GOPRO_NAME_PREFIX
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.feature.connection.api.ConnectionApi
 import com.bortxapps.goprocontrollerandroid.feature.connection.mapper.goProBleConnectionStateMapper
 import com.bortxapps.goprocontrollerandroid.feature.connection.mapper.toMapCamera
+import com.bortxapps.simplebleclient.exceptions.SimpleBleClientException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -33,9 +35,13 @@ class GoProConnectorImpl(
     }
 
     override suspend fun getCamerasPaired(): Result<List<GoProCamera>> {
-        return Result.success(api.getPairedCameras(context, GOPRO_NAME_PREFIX).map {
-            it.toMapCamera()
-        })
+        return  try {
+            Result.success(api.getPairedCameras(context, GOPRO_NAME_PREFIX).map {
+                it.toMapCamera()
+            })
+        } catch (e : SimpleBleClientException) {
+            Result.failure(mapBleException(e))
+        }
     }
 
     override suspend fun connectToDevice(address: String): Result<Boolean> = try {
@@ -44,8 +50,8 @@ class GoProConnectorImpl(
         } else {
             Result.failure(GoProException(GoProError.OTHER))
         }
-    } catch (e: GoProException) {
-        Result.failure(e)
+    } catch (e: SimpleBleClientException) {
+        Result.failure(mapBleException(e))
     } catch (e: Exception) {
         Log.e("BleManager", "connectToDevice ${e.message} ${e.stackTraceToString()}")
         Result.failure(GoProException(GoProError.OTHER))

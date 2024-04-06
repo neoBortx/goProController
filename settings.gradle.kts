@@ -10,10 +10,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://jitpack.io")
+        }
     }
 }
 
 rootProject.name = "goProControllerExample"
 include(":app")
 include(":goProControllerAndroid")
-include(":simpleBleClient")

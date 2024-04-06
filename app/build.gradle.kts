@@ -1,4 +1,4 @@
-@Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.bortxapps.goprocontrollerexample"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.bortxapps.goprocontrollerexample"
         minSdk = 29
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -76,6 +76,7 @@ dependencies {
 
     // Arrow
     implementation(libs.arrow.core)
+    implementation(libs.leakcanary)
 
     // Permissions
     implementation(libs.accompanist.permissions)

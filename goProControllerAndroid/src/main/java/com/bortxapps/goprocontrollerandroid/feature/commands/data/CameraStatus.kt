@@ -5,14 +5,18 @@ import java.nio.ByteBuffer
 
 object CameraStatus {
 
-    @OptIn(ExperimentalUnsignedTypes::class)
-    fun decodeStatus(map: Map<UByte, UByteArray>): Map<String, String> {
+
+    fun decodeStatus(map: Map<Byte, ByteArray>): Map<String, String> {
         val res = mutableMapOf<String, String>()
         map.keys.forEach {
-            val key: CameraStatusIds = CameraStatusIds.fromValue(it.toString())
-            map[it]?.let { value ->
-                Log.d("CameraStatus", "Decoding key: $key, value: $value")
-                res += key.name to cameraStatusEnumConversionMap[key]?.invoke(value).toString()
+            try {
+
+                val key: CameraStatusIds = CameraStatusIds.fromValue(it.toString())
+                map[it]?.let { value ->
+                    res += key.name to cameraStatusEnumConversionMap[key]?.invoke(value).toString()
+                }
+            } catch (e: Exception) {
+                Log.e("CameraStatus", "Error decoding key: $it, value: ${map[it]}")
             }
         }
         return res
@@ -281,16 +285,18 @@ object CameraStatus {
         ZERO("0"),
         ONE("1"),
         TWO("2"),
-        THREE("3");
+        THREE("3"),
+        FOUR("4");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): InternalBatteryLevel {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): InternalBatteryLevel {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> ZERO
                     "1" -> ONE
                     "2" -> TWO
                     "3" -> THREE
+                    "4" -> FOUR
                     else -> throw IllegalArgumentException("Invalid value for InternalBatteryLevel: $value")
                 }
             }
@@ -305,9 +311,9 @@ object CameraStatus {
         COMPLETED("4");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): PairingState {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): PairingState {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> NEVER_PAIRED
                     "1" -> STARTED
                     "2" -> ABORTED
@@ -326,9 +332,9 @@ object CameraStatus {
         PAIRING_BLUETOOTH_DEVICE("3");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): LastTypePairing {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): LastTypePairing {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> NEVER_PAIRED
                     "1" -> PAIRING_APP
                     "2" -> PAIRING_REMOTE_CONTROL
@@ -347,9 +353,9 @@ object CameraStatus {
         COMPLETED("4");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): CurrentScanState {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): CurrentScanState {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> NEVER_STARTED
                     "1" -> STARTED
                     "2" -> ABORTED
@@ -370,9 +376,9 @@ object CameraStatus {
         COMPLETED("5");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): WiFiAPProvisioningState {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): WiFiAPProvisioningState {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> NEVER_STARTED
                     "1" -> STARTED
                     "2" -> ABORTED
@@ -394,9 +400,9 @@ object CameraStatus {
         SD_CARD_SWAPPED("8");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): PrimaryStorageStatus {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): PrimaryStorageStatus {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "-1" -> UNKNOWN
                     "0" -> OK
                     "1" -> SD_CARD_FULL
@@ -424,9 +430,9 @@ object CameraStatus {
         GOPRO_APP_READY("10");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): OTAUpdateStatus {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): OTAUpdateStatus {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> IDLE
                     "1" -> DOWNLOADING
                     "2" -> VERIFYING
@@ -451,9 +457,9 @@ object CameraStatus {
         HEMISPHERE("3");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): LiveViewExposureSelectMode {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): LiveViewExposureSelectMode {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> DISABLED
                     "1" -> AUTO
                     "2" -> ISO_LOCK
@@ -470,9 +476,9 @@ object CameraStatus {
         CONNECTED_WITH_MICROPHONE("2");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): MicrophoneAccessoryStatus {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): MicrophoneAccessoryStatus {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> NOT_CONNECTED
                     "1" -> CONNECTED
                     "2" -> CONNECTED_WITH_MICROPHONE
@@ -488,9 +494,9 @@ object CameraStatus {
         MAX("2");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): WirelessBand {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): WirelessBand {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> BAND_2_4_GHZ
                     "1" -> BAND_5_GHZ
                     "2" -> MAX
@@ -514,9 +520,9 @@ object CameraStatus {
         DEGREES_270("3");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): CameraRotationalOrientation {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): CameraRotationalOrientation {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> DEGREES_0
                     "1" -> DEGREES_180
                     "2" -> DEGREES_90
@@ -539,9 +545,9 @@ object CameraStatus {
         MICROPHONE_WITH_EXTERNAL_MIC("3");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): MediaModState {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): MediaModState {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> MICROPHONE_REMOVED
                     "2" -> MICROPHONE_ONLY
                     "3" -> MICROPHONE_WITH_EXTERNAL_MIC
@@ -567,9 +573,9 @@ object CameraStatus {
         SLOW_MOTION("12");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): TimeWarpSpeed {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): TimeWarpSpeed {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> SPEED_15X
                     "1" -> SPEED_30X
                     "2" -> SPEED_60X
@@ -595,9 +601,9 @@ object CameraStatus {
         MAX_LENS_2_0("2");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): CameraLensType {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): CameraLensType {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> DEFAULT
                     "1" -> MAX_LENS
                     "2" -> MAX_LENS_2_0
@@ -618,9 +624,9 @@ object CameraStatus {
         SELFIE_MODE_1_HDMI_1_MEDIA_MOD_TRUE("7");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): MediaModeStatus {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): MediaModeStatus {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> SELFIE_MODE_0_HDMI_0_MEDIA_MOD_FALSE
                     "1" -> SELFIE_MODE_0_HDMI_0_MEDIA_MOD_TRUE
                     "2" -> SELFIE_MODE_0_HDMI_1_MEDIA_MOD_FALSE
@@ -641,9 +647,9 @@ object CameraStatus {
         CAMERA_EXTERNAL_CONTROL("2");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): CameraControlStatus {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): CameraControlStatus {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> CAMERA_IDLE
                     "1" -> CAMERA_CONTROL
                     "2" -> CAMERA_EXTERNAL_CONTROL
@@ -658,9 +664,9 @@ object CameraStatus {
         ENABLED("1");
 
         companion object {
-            @OptIn(ExperimentalUnsignedTypes::class)
-            fun fromValue(value: UByteArray): CameraControlOverUSBState {
-                return when (ByteBuffer.wrap(value.toByteArray())[0].toInt().toString()) {
+
+            fun fromValue(value: ByteArray): CameraControlOverUSBState {
+                return when (ByteBuffer.wrap(value)[0].toInt().toString()) {
                     "0" -> DISABLED
                     "1" -> ENABLED
                     else -> throw IllegalArgumentException("Invalid value for CameraControlOverUSBState: $value")
@@ -671,20 +677,20 @@ object CameraStatus {
 
     private const val INTEGER_BYTES_LENGTH = 4
 
-    @OptIn(ExperimentalUnsignedTypes::class)
-    private fun getValueInt(value: UByteArray): Int = if (value.size == INTEGER_BYTES_LENGTH) {
-        ByteBuffer.wrap(value.toByteArray()).getInt()
+
+    private fun getValueInt(value: ByteArray): Int = if (value.size == INTEGER_BYTES_LENGTH) {
+        ByteBuffer.wrap(value).getInt()
     } else {
-        ByteBuffer.wrap(value.toByteArray())[0].toInt()
+        ByteBuffer.wrap(value)[0].toInt()
     }
 
-    @OptIn(ExperimentalUnsignedTypes::class)
-    private fun getValueString(value: UByteArray): String = String(value.toByteArray(), Charsets.UTF_8)
 
-    @OptIn(ExperimentalUnsignedTypes::class)
-    private fun getValueBoolean(value: UByteArray): Boolean = ByteBuffer.wrap(value.toByteArray())[0].toInt() == 1
+    private fun getValueString(value: ByteArray): String = String(value, Charsets.UTF_8)
 
-    @OptIn(ExperimentalUnsignedTypes::class)
+
+    private fun getValueBoolean(value: ByteArray): Boolean = ByteBuffer.wrap(value)[0].toInt() == 1
+
+
     val cameraStatusEnumConversionMap = mapOf(
         CameraStatusIds.INTERNAL_BATTERY_PRESENT to ::getValueBoolean,
         CameraStatusIds.INTERNAL_BATTERY_LEVEL to InternalBatteryLevel::fromValue,

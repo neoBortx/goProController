@@ -1,12 +1,15 @@
 package com.bortxapps.goprocontrollerandroid.domain.contracts
 
 import com.bortxapps.goprocontrollerandroid.domain.data.FrameRate
+import com.bortxapps.goprocontrollerandroid.domain.data.GoProSettings
 import com.bortxapps.goprocontrollerandroid.domain.data.HyperSmooth
 import com.bortxapps.goprocontrollerandroid.domain.data.Presets
 import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
 import com.bortxapps.goprocontrollerandroid.domain.data.Speed
+import kotlinx.coroutines.flow.Flow
 
 interface GoProCommands {
+    suspend fun subscribeToCameraSettingsChanges(): Flow<GoProSettings>
     suspend fun getWifiApSSID(): Result<String>
     suspend fun getWifiApPassword(): Result<String>
     suspend fun getOpenGoProVersion(): Result<String>
