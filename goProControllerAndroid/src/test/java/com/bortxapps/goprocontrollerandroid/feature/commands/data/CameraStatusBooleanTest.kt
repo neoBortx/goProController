@@ -51,7 +51,7 @@ class CameraStatusBooleanTest(
     @Test
     fun testBooleanStatusDecoding() {
         val mockData = mapOf(
-            statusId.id.toUByte() to ubyteArrayOf((if (expectedValue) 1 else 0).toUByte())
+            statusId.id.toByte() to byteArrayOf((if (expectedValue) 1 else 0))
         )
         val result = CameraStatus.decodeStatus(mockData)
         assertEquals(expectedValue.toString(), result[statusId.name])

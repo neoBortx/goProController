@@ -5,11 +5,11 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.simplebleclient.api.contracts.BleNetworkMessageProcessor
 import com.bortxapps.simplebleclient.api.data.BleNetworkMessage
 import java.util.UUID
+import kotlin.experimental.and
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class FragmentedNetworkMessageProcessorImpl: BleNetworkMessageProcessor {
 
-    private var packet = ubyteArrayOf()
+    private var packet = byteArrayOf()
     private var bytesRemaining = 0
     private var characteristic: UUID? = null
 
@@ -22,38 +22,38 @@ class FragmentedNetworkMessageProcessorImpl: BleNetworkMessageProcessor {
 
     }
 
-    private enum class Mask(val value: UByte) {
-        Header(0b01100000U),
-        Continuation(0b10000000U),
-        GenLength(0b00011111U),
-        Ext13Byte0(0b00011111U)
+    private enum class Mask(val value: Byte) {
+        Header(0b01100000),
+        Continuation(0b10000000.toByte()),
+        GenLength(0b00011111),
+        Ext13Byte0(0b00011111)
     }
 
-    private enum class Header(val value: UByte) {
-        GENERAL(0b00U),
-        EXT_13(0b01U),
-        EXT_16(0b10U),
-        RESERVED(0b11U);
+    private enum class Header(val value: Byte) {
+        GENERAL(0b00),
+        EXT_13(0b01),
+        EXT_16(0b10),
+        RESERVED(0b11);
 
         companion object {
-            private val valueMap: Map<UByte, Header> by lazy {
+            private val valueMap: Map<Byte, Header> by lazy {
                 Header.values().associateBy { it.value }
             }
 
-            fun fromValue(value: Int) = valueMap.getValue(value.toUByte())
+            fun fromValue(value: Int) = valueMap.getValue(value.toByte())
         }
     }
     override fun processMessage(characteristic: UUID, data: ByteArray) {
 
         if (isWiffiMessage(characteristic)) {
-            packet = data.toUByteArray()
+            packet = data
             bytesRemaining = 0
         } else {
-            if (isContinuationMessage(data.toUByteArray())) {
-                packet += data.drop(1).toByteArray().toUByteArray()
+            if (isContinuationMessage(data)) {
+                packet += data.drop(1).toByteArray()
                 bytesRemaining -= data.size - 1
             } else {
-                processNewMessage(characteristic, data.toUByteArray())
+                processNewMessage(characteristic, data)
             }
         }
     }
@@ -62,46 +62,51 @@ class FragmentedNetworkMessageProcessorImpl: BleNetworkMessageProcessor {
             || characteristic == GoProUUID.WIFI_AP_PASSWORD.uuid
             || characteristic == GoProUUID.WIFI_AP_SERVICE.uuid
 
-    private fun processNewMessage(characteristic: UUID, data: UByteArray) {
+    private fun processNewMessage(characteristic: UUID, data: ByteArray) {
         this.characteristic = characteristic
-        packet = ubyteArrayOf()
+        packet = byteArrayOf()
         var buff = data
         when (Header.fromValue((data.first() and Mask.Header.value).toInt() shr BITS_5)) {
             Header.GENERAL -> {
                 bytesRemaining = data[0].and(Mask.GenLength.value).toInt()
-                buff = buff.drop(GENERAL_HEADER_SIZE).toUByteArray()
+                buff = buff.drop(GENERAL_HEADER_SIZE).toByteArray()
             }
 
             Header.EXT_13 -> {
                 bytesRemaining = ((data[0].and(Mask.Ext13Byte0.value).toLong() shl BITS_8) or data[1].toLong()).toInt()
-                buff = buff.drop(EXT_13_HEADER_SIZE).toUByteArray()
+                buff = buff.drop(EXT_13_HEADER_SIZE).toByteArray()
             }
 
             Header.EXT_16 -> {
                 bytesRemaining = ((data[1].toLong() shl BITS_8) or data[2].toLong()).toInt()
-                buff = buff.drop(EXT_16_HEADER_SIZE).toUByteArray()
+                buff = buff.drop(EXT_16_HEADER_SIZE).toByteArray()
             }
 
             Header.RESERVED -> {
                 throw NoSuchElementException("Reserved header")
             }
         }
-        packet += if (buff.size >= bytesRemaining) buff.take(bytesRemaining) else buff
+        if (buff.size >= bytesRemaining){
+            packet += buff.take(bytesRemaining)
+        } else {
+            packet += buff
+        }
+
         if (buff.size >= bytesRemaining) bytesRemaining = 0 else bytesRemaining -= buff.size
     }
 
     override fun clearData() {
-        packet = ubyteArrayOf()
+        packet = byteArrayOf()
         bytesRemaining = 0
         characteristic = null
     }
 
-    private fun isContinuationMessage(data: UByteArray) = data.firstOrNull()?.and(Mask.Continuation.value) == Mask.Continuation.value
+    private fun isContinuationMessage(data: ByteArray) = data.firstOrNull()?.and(Mask.Continuation.value) == Mask.Continuation.value
 
     override fun isFullyReceived(): Boolean {
         Log.e("BleNetworkMessageProcessor", "bytesRemaining in isFullyReceived -> $bytesRemaining")
         return bytesRemaining == 0
     }
 
-    override fun getPacket(): BleNetworkMessage = BleNetworkMessage(characteristic, packet.toByteArray(), !isFullyReceived())
+    override fun getPacket(): BleNetworkMessage = BleNetworkMessage(characteristic, packet, !isFullyReceived())
 }

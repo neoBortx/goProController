@@ -5,20 +5,19 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-@OptIn(ExperimentalUnsignedTypes::class)
 @RunWith(Parameterized::class)
 class CameraStatusAccMicStatusTest(
-    private val data: Pair<UByteArray, CameraStatus.MicrophoneAccessoryStatus>
+    private val data: Pair<ByteArray, CameraStatus.MicrophoneAccessoryStatus>
 ) {
 
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{index}: Test with byteArrayValue={0}, expectedEnum={1}")
-        fun data(): Collection<Pair<UByteArray, CameraStatus.MicrophoneAccessoryStatus>> {
+        fun data(): Collection<Pair<ByteArray, CameraStatus.MicrophoneAccessoryStatus>> {
             return listOf(
-                Pair(ubyteArrayOf(0.toUByte()), CameraStatus.MicrophoneAccessoryStatus.NOT_CONNECTED),
-                Pair(ubyteArrayOf(1.toUByte()), CameraStatus.MicrophoneAccessoryStatus.CONNECTED),
-                Pair(ubyteArrayOf(2.toUByte()), CameraStatus.MicrophoneAccessoryStatus.CONNECTED_WITH_MICROPHONE)
+                Pair(byteArrayOf(0), CameraStatus.MicrophoneAccessoryStatus.NOT_CONNECTED),
+                Pair(byteArrayOf(1), CameraStatus.MicrophoneAccessoryStatus.CONNECTED),
+                Pair(byteArrayOf(2), CameraStatus.MicrophoneAccessoryStatus.CONNECTED_WITH_MICROPHONE)
             )
         }
     }
@@ -29,7 +28,7 @@ class CameraStatusAccMicStatusTest(
         val expected = data.second
 
         val mockData = mapOf(
-            CameraStatus.CameraStatusIds.ACC_MIC_STATUS.id.toUByte() to bytes
+            CameraStatus.CameraStatusIds.ACC_MIC_STATUS.id.toByte() to bytes
         )
         val result = CameraStatus.decodeStatus(mockData)
         assertEquals(expected.toString(), result[CameraStatus.CameraStatusIds.ACC_MIC_STATUS.name])

@@ -6,7 +6,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.Resolution
 import com.bortxapps.goprocontrollerandroid.domain.data.Speed
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProBleCommands
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
-import com.bortxapps.simplebleclient.manager.contracts.SimpleBleClient
+import com.bortxapps.simplebleclient.api.contracts.SimpleBleClient
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -31,7 +31,7 @@ class CommandsApiTest {
 
         commandsApi.getWifiApSSID()
 
-        coVerify { bleManager.readData(expectedUUIDService, expectedUUIDChar) }
+        coVerify { bleManager.reader.readData(expectedUUIDService, expectedUUIDChar) }
     }
 
     @Test
@@ -41,7 +41,7 @@ class CommandsApiTest {
 
         commandsApi.getWifiApPassword()
 
-        coVerify { bleManager.readData(expectedUUIDService, expectedUUIDChar) }
+        coVerify { bleManager.reader.readData(expectedUUIDService, expectedUUIDChar) }
     }
 
     @Test
@@ -52,7 +52,7 @@ class CommandsApiTest {
 
         commandsApi.enableWifiAp()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -63,7 +63,7 @@ class CommandsApiTest {
 
         commandsApi.disableWifiAp()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -74,7 +74,7 @@ class CommandsApiTest {
 
         commandsApi.setPresetsVideo()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -85,7 +85,7 @@ class CommandsApiTest {
 
         commandsApi.setShutterOff()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -96,7 +96,7 @@ class CommandsApiTest {
 
         commandsApi.setShutterOn()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -107,7 +107,7 @@ class CommandsApiTest {
 
         commandsApi.setPresetsPhoto()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -118,7 +118,7 @@ class CommandsApiTest {
 
         commandsApi.setPresetsTimeLapse()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -129,7 +129,7 @@ class CommandsApiTest {
 
         commandsApi.getOpenGoProVersion()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -140,7 +140,7 @@ class CommandsApiTest {
 
         commandsApi.getCameraStatus()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData, true) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData)}
     }
 
     @Test
@@ -151,7 +151,7 @@ class CommandsApiTest {
 
         commandsApi.getResolution()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData, true) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData)}
     }
 
     @Test
@@ -162,7 +162,7 @@ class CommandsApiTest {
 
         commandsApi.getFrameRate()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData, true) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData)}
     }
 
     @Test
@@ -173,7 +173,7 @@ class CommandsApiTest {
 
         commandsApi.getHyperSmooth()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData, true) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData)}
     }
 
     @Test
@@ -184,7 +184,7 @@ class CommandsApiTest {
 
         commandsApi.getPresets()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData, true) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData)}
     }
 
     @Test
@@ -195,7 +195,7 @@ class CommandsApiTest {
 
         commandsApi.getSpeed()
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData, true) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData)}
     }
 
     @Test
@@ -206,7 +206,7 @@ class CommandsApiTest {
 
         commandsApi.setResolution(Resolution.RESOLUTION_2_7K)
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -217,7 +217,7 @@ class CommandsApiTest {
 
         commandsApi.setFrameRate(FrameRate.FRAME_RATE_120)
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -228,7 +228,7 @@ class CommandsApiTest {
 
         commandsApi.setHyperSmooth(HyperSmooth.HIGH)
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 
     @Test
@@ -239,6 +239,6 @@ class CommandsApiTest {
 
         commandsApi.setSpeed(Speed.ULTRA_SLOW_MO_8X)
 
-        coVerify { bleManager.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
+        coVerify { bleManager.writer.sendData(expectedUUIDService, expectedUUIDChar, expectedData) }
     }
 }

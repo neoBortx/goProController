@@ -13,10 +13,10 @@ class CameraStatusTest {
         // Arrange
         // Assuming '1' represents the internal battery is present and '0' represents it's not
         val mockDataBatteryPresent = mapOf(
-            CameraStatus.CameraStatusIds.INTERNAL_BATTERY_PRESENT.id.toUByte() to ubyteArrayOf(1.toUByte())
+            CameraStatus.CameraStatusIds.INTERNAL_BATTERY_PRESENT.id.toByte() to byteArrayOf(1)
         )
         val mockDataBatteryAbsent = mapOf(
-            CameraStatus.CameraStatusIds.INTERNAL_BATTERY_PRESENT.id.toUByte() to ubyteArrayOf(0.toUByte())
+            CameraStatus.CameraStatusIds.INTERNAL_BATTERY_PRESENT.id.toByte() to byteArrayOf(0)
         )
 
         // Act
@@ -34,15 +34,15 @@ class CameraStatusTest {
     @Test
     fun `decodeStatus should correctly decode all INTERNAL_BATTERY_LEVEL values`() {
         val batteryLevelData = mapOf(
-            CameraStatus.InternalBatteryLevel.ZERO to ubyteArrayOf(0.toUByte()),
-            CameraStatus.InternalBatteryLevel.ONE to ubyteArrayOf(1.toUByte()),
-            CameraStatus.InternalBatteryLevel.TWO to ubyteArrayOf(2.toUByte()),
-            CameraStatus.InternalBatteryLevel.THREE to ubyteArrayOf(3.toUByte())
+            CameraStatus.InternalBatteryLevel.ZERO to byteArrayOf(0),
+            CameraStatus.InternalBatteryLevel.ONE to byteArrayOf(1),
+            CameraStatus.InternalBatteryLevel.TWO to byteArrayOf(2),
+            CameraStatus.InternalBatteryLevel.THREE to byteArrayOf(3)
         )
 
         batteryLevelData.forEach { (expectedLevel, byteArray) ->
             val mockData = mapOf(
-                CameraStatus.CameraStatusIds.INTERNAL_BATTERY_LEVEL.id.toUByte() to byteArray
+                CameraStatus.CameraStatusIds.INTERNAL_BATTERY_LEVEL.id.toByte() to byteArray
             )
 
             val result = CameraStatus.decodeStatus(mockData)
@@ -54,7 +54,7 @@ class CameraStatusTest {
     @Test
     fun `test decode INTERNAL_BATTERY_LEVEL with an unknown value throws IllegalArgumentException`() {
         val mockData = mapOf(
-            CameraStatus.CameraStatusIds.INTERNAL_BATTERY_LEVEL.id.toUByte() to ByteArray(1) { 56.toByte() }.toUByteArray()
+            CameraStatus.CameraStatusIds.INTERNAL_BATTERY_LEVEL.id.toByte() to ByteArray(1) { 56.toByte() }
         )
 
         assertThrows(IllegalArgumentException::class.java) {
@@ -68,13 +68,13 @@ class CameraStatusTest {
     @Test
     fun `decodeStatus should correctly decode SYSTEM_HOT status`() {
         val systemHotData = mapOf(
-            true to ubyteArrayOf(1.toUByte()), // Assuming '1' represents system is hot
-            false to ubyteArrayOf(0.toUByte()) // Assuming '0' represents system is not hot
+            true to byteArrayOf(1), // Assuming '1' represents system is hot
+            false to byteArrayOf(0) // Assuming '0' represents system is not hot
         )
 
         systemHotData.forEach { (expectedState, byteArray) ->
             val mockData = mapOf(
-                CameraStatus.CameraStatusIds.SYSTEM_HOT.id.toUByte() to byteArray
+                CameraStatus.CameraStatusIds.SYSTEM_HOT.id.toByte() to byteArray
             )
 
             val result = CameraStatus.decodeStatus(mockData)
@@ -88,13 +88,13 @@ class CameraStatusTest {
     @Test
     fun `decodeStatus should correctly decode SYSTEM_BUSY status`() {
         val systemBusyData = mapOf(
-            true to ubyteArrayOf(1.toUByte()), // Assuming '1' represents system is busy
-            false to ubyteArrayOf(0.toUByte()) // Assuming '0' represents system is not busy
+            true to byteArrayOf(1), // Assuming '1' represents system is busy
+            false to byteArrayOf(0) // Assuming '0' represents system is not busy
         )
 
         systemBusyData.forEach { (expectedState, byteArray) ->
             val mockData = mapOf(
-                CameraStatus.CameraStatusIds.SYSTEM_BUSY.id.toUByte() to byteArray
+                CameraStatus.CameraStatusIds.SYSTEM_BUSY.id.toByte() to byteArray
             )
 
             val result = CameraStatus.decodeStatus(mockData)
@@ -108,13 +108,13 @@ class CameraStatusTest {
     @Test
     fun `decodeStatus should correctly decode QUICK_CAPTURE_ACTIVE status`() {
         val quickCaptureActiveData = mapOf(
-            true to ubyteArrayOf(1.toUByte()), // Assuming '1' represents Quick Capture is active
-            false to ubyteArrayOf(0.toUByte()) // Assuming '0' represents Quick Capture is not active
+            true to byteArrayOf(1), // Assuming '1' represents Quick Capture is active
+            false to byteArrayOf(0) // Assuming '0' represents Quick Capture is not active
         )
 
         quickCaptureActiveData.forEach { (expectedState, byteArray) ->
             val mockData = mapOf(
-                CameraStatus.CameraStatusIds.QUICK_CAPTURE_ACTIVE.id.toUByte() to byteArray
+                CameraStatus.CameraStatusIds.QUICK_CAPTURE_ACTIVE.id.toByte() to byteArray
             )
 
             val result = CameraStatus.decodeStatus(mockData)
@@ -128,13 +128,13 @@ class CameraStatusTest {
     @Test
     fun `decodeStatus should correctly decode ENCODING_ACTIVE status`() {
         val encodingActiveData = mapOf(
-            true to ubyteArrayOf(1.toUByte()), // '1' represents encoding is active
-            false to ubyteArrayOf(0.toUByte()) // '0' represents encoding is not active
+            true to byteArrayOf(1), // '1' represents encoding is active
+            false to byteArrayOf(0) // '0' represents encoding is not active
         )
 
         encodingActiveData.forEach { (expectedState, byteArray) ->
             val mockData = mapOf(
-                CameraStatus.CameraStatusIds.ENCODING_ACTIVE.id.toUByte() to byteArray
+                CameraStatus.CameraStatusIds.ENCODING_ACTIVE.id.toByte() to byteArray
             )
 
             val result = CameraStatus.decodeStatus(mockData)
@@ -148,13 +148,13 @@ class CameraStatusTest {
     @Test
     fun `decodeStatus should correctly decode LCD_LOCK_ACTIVE status`() {
         val lcdLockActiveData = mapOf(
-            true to ubyteArrayOf(1.toUByte()), // '1' represents LCD lock is active
-            false to ubyteArrayOf(0.toUByte()) // '0' represents LCD lock is not active
+            true to byteArrayOf(1), // '1' represents LCD lock is active
+            false to byteArrayOf(0) // '0' represents LCD lock is not active
         )
 
         lcdLockActiveData.forEach { (expectedState, byteArray) ->
             val mockData = mapOf(
-                CameraStatus.CameraStatusIds.LCD_LOCK_ACTIVE.id.toUByte() to byteArray
+                CameraStatus.CameraStatusIds.LCD_LOCK_ACTIVE.id.toByte() to byteArray
             )
 
             val result = CameraStatus.decodeStatus(mockData)
@@ -167,9 +167,9 @@ class CameraStatusTest {
     //region VIDEO_PROGRESS_COUNTER
     @Test
     fun `decodeStatus should correctly decode VIDEO_PROGRESS_COUNTER status`() {
-        val videoProgressTime = 45 // Example non-zero value for video progress (in seconds)
+        val videoProgressTime = 45.toByte() // Example non-zero value for video progress (in seconds)
         val mockData = mapOf(
-            CameraStatus.CameraStatusIds.VIDEO_PROGRESS_COUNTER.id.toUByte() to ubyteArrayOf(videoProgressTime.toUByte())
+            CameraStatus.CameraStatusIds.VIDEO_PROGRESS_COUNTER.id.toByte() to byteArrayOf(videoProgressTime)
         )
 
         val result = CameraStatus.decodeStatus(mockData)

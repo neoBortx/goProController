@@ -8,17 +8,17 @@ import org.junit.runners.Parameterized
 @OptIn(ExperimentalUnsignedTypes::class)
 @RunWith(Parameterized::class)
 class CameraStatusWirelessBandTest(
-    private val data: Pair<UByteArray, CameraStatus.WirelessBand>
+    private val data: Pair<ByteArray, CameraStatus.WirelessBand>
 ) {
 
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{index}: Test with byteArrayValue={0}, expectedEnum={1}")
-        fun data(): Collection<Pair<UByteArray, CameraStatus.WirelessBand>> {
+        fun data(): Collection<Pair<ByteArray, CameraStatus.WirelessBand>> {
             return listOf(
-                Pair(ubyteArrayOf(0.toUByte()), CameraStatus.WirelessBand.BAND_2_4_GHZ),
-                Pair(ubyteArrayOf(1.toUByte()), CameraStatus.WirelessBand.BAND_5_GHZ),
-                Pair(ubyteArrayOf(2.toUByte()), CameraStatus.WirelessBand.MAX)
+                Pair(byteArrayOf(0), CameraStatus.WirelessBand.BAND_2_4_GHZ),
+                Pair(byteArrayOf(1), CameraStatus.WirelessBand.BAND_5_GHZ),
+                Pair(byteArrayOf(2), CameraStatus.WirelessBand.MAX)
             )
         }
     }
@@ -29,7 +29,7 @@ class CameraStatusWirelessBandTest(
         val expected = data.second
 
         val mockData = mapOf(
-            CameraStatus.CameraStatusIds.WIRELESS_BAND.id.toUByte() to bytes
+            CameraStatus.CameraStatusIds.WIRELESS_BAND.id.toByte() to bytes
         )
         val result = CameraStatus.decodeStatus(mockData)
         assertEquals(expected.toString(), result[CameraStatus.CameraStatusIds.WIRELESS_BAND.name])

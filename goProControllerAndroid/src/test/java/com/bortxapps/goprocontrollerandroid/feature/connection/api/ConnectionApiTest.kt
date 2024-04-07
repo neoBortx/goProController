@@ -1,7 +1,7 @@
 package com.bortxapps.goprocontrollerandroid.feature.connection.api
 
 import android.content.Context
-import com.bortxapps.simplebleclient.manager.contracts.SimpleBleClient
+import com.bortxapps.simplebleclient.api.contracts.SimpleBleClient
 import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
@@ -31,41 +31,41 @@ class ConnectionApiTest {
     fun getNearByCameras_callsBleManager() = runTest {
         connectionApi.getNearByCameras(serviceUUID)
 
-        coVerify { bleManager.getDevicesByService(serviceUUID) }
+        coVerify { bleManager.deviceSeeker.getDevicesNearby(serviceUUID) }
     }
 
     @Test
     fun stopSearch_callsBleManager() = runTest  {
         connectionApi.stopSearch()
 
-        coVerify { bleManager.stopSearchDevices() }
+        coVerify { bleManager.deviceSeeker.stopSearchDevices() }
     }
 
     @Test
     fun getPairedCameras_callsBleManager() = runTest  {
         connectionApi.getPairedCameras(context, deviceNamePrefix)
 
-        coVerify { bleManager.getPairedDevicesByPrefix(context, deviceNamePrefix) }
+        coVerify { bleManager.deviceSeeker.getPairedDevices(context) }
     }
 
     @Test
     fun connectToDevice_callsBleManager() = runBlocking {
         connectionApi.connectToDevice(context, deviceAddress)
 
-        coVerify { bleManager.connectToDevice(context, deviceAddress) }
+        coVerify { bleManager.connection.connectToDevice(context, deviceAddress) }
     }
 
     @Test
     fun subscribeToConnectionStatusChanges_callsBleManager() {
         connectionApi.subscribeToConnectionStatusChanges()
 
-        verify { bleManager.subscribeToConnectionStatusChanges() }
+        verify { bleManager.connection.subscribeToConnectionStatusChanges() }
     }
 
     @Test
     fun disconnectBle_callsBleManager() = runBlocking {
         connectionApi.disconnectBle()
 
-        coVerify { bleManager.disconnect() }
+        coVerify { bleManager.connection.disconnect() }
     }
 }

@@ -9,7 +9,7 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 class MapHyperSmoothTest(
-    private val pair: Pair<UByte, HyperSmooth>
+    private val pair: Pair<Byte, HyperSmooth>
 ) {
     @Test
     fun `mapHyperSmooth should map UByte to HyperSmooth`() {
@@ -22,14 +22,14 @@ class MapHyperSmoothTest(
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{index}: Test with data={0}, expected={1}")
-        fun data(): List<Pair<UByte, HyperSmooth>> {
+        fun data(): List<Pair<Byte, HyperSmooth>> {
             return listOf(
-                Pair((GoProBleCommands.SetHyperSmoothOff.byteArray.last()).toUByte(), HyperSmooth.OFF),
-                Pair((GoProBleCommands.SetHyperSmoothLow.byteArray.last()).toUByte(), HyperSmooth.LOW),
-                Pair((GoProBleCommands.SetHyperSmoothHigh.byteArray.last()).toUByte(), HyperSmooth.HIGH),
-                Pair((GoProBleCommands.SetHyperSmoothBoost.byteArray.last()).toUByte(), HyperSmooth.BOOST),
-                Pair((GoProBleCommands.SetHyperSmoothAuto.byteArray.last()).toUByte(), HyperSmooth.AUTO),
-                Pair((GoProBleCommands.SetHyperSmoothStandard.byteArray.last()).toUByte(), HyperSmooth.STANDARD)
+                Pair((GoProBleCommands.SetHyperSmoothOff.byteArray.last()), HyperSmooth.OFF),
+                Pair((GoProBleCommands.SetHyperSmoothLow.byteArray.last()), HyperSmooth.LOW),
+                Pair((GoProBleCommands.SetHyperSmoothHigh.byteArray.last()), HyperSmooth.HIGH),
+                Pair((GoProBleCommands.SetHyperSmoothBoost.byteArray.last()), HyperSmooth.BOOST),
+                Pair((GoProBleCommands.SetHyperSmoothAuto.byteArray.last()), HyperSmooth.AUTO),
+                Pair((GoProBleCommands.SetHyperSmoothStandard.byteArray.last()), HyperSmooth.STANDARD)
             )
         }
     }

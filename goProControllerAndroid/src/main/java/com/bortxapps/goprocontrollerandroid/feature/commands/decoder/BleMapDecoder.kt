@@ -72,8 +72,6 @@ fun Any?.toJsonElement(): JsonElement {
         is UByteArray -> this.toByteArray().joinToString(separator = ":") {
             String.format(Locale.getDefault(), "%02X", it)
         }.toJsonElement()
-
-        is UByte -> ubyteArrayOf(this).toJsonElement()
         is JsonElement -> this
         null -> JsonNull
         else -> {

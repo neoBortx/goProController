@@ -9,7 +9,7 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 class MapPresetsTest(
-    private val pair: Pair<UByte, Presets>
+    private val pair: Pair<Byte, Presets>
 ) {
     @Test
     fun `mapPresets should map UByte to Presets`() {
@@ -22,11 +22,11 @@ class MapPresetsTest(
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{index}: Test with data={0}, expected={1}")
-        fun data(): List<Pair<UByte, Presets>> {
+        fun data(): List<Pair<Byte, Presets>> {
             return listOf(
-                Pair((GoProBleCommands.SetPresetsPhoto.byteArray.last()).toUByte(), Presets.PHOTO),
-                Pair((GoProBleCommands.SetPresetsVideo.byteArray.last()).toUByte(), Presets.VIDEO),
-                Pair((GoProBleCommands.SetPresetsTimeLapse.byteArray.last()).toUByte(), Presets.TIME_LAPSE)
+                Pair((GoProBleCommands.SetPresetsPhoto.byteArray.last()), Presets.PHOTO),
+                Pair((GoProBleCommands.SetPresetsVideo.byteArray.last()), Presets.VIDEO),
+                Pair((GoProBleCommands.SetPresetsTimeLapse.byteArray.last()), Presets.TIME_LAPSE)
             )
         }
     }

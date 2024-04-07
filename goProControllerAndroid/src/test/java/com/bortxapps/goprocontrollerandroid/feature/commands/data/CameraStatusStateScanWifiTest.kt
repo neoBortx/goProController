@@ -5,22 +5,21 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
-@OptIn(ExperimentalUnsignedTypes::class)
 @RunWith(Parameterized::class)
 class CameraStatusStateScanWifiTest(
-    private val data: Pair<UByteArray, CameraStatus.CurrentScanState>
+    private val data: Pair<ByteArray, CameraStatus.CurrentScanState>
 ) {
 
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{index}: Test with byteArrayValue={0}, expectedEnum={1}")
-        fun data(): Collection<Pair<UByteArray, CameraStatus.CurrentScanState>> {
+        fun data(): Collection<Pair<ByteArray, CameraStatus.CurrentScanState>> {
             return listOf(
-                Pair(ubyteArrayOf(0.toUByte()), CameraStatus.CurrentScanState.NEVER_STARTED),
-                Pair(ubyteArrayOf(1.toUByte()), CameraStatus.CurrentScanState.STARTED),
-                Pair(ubyteArrayOf(2.toUByte()), CameraStatus.CurrentScanState.ABORTED),
-                Pair(ubyteArrayOf(3.toUByte()), CameraStatus.CurrentScanState.CANCELED),
-                Pair(ubyteArrayOf(4.toUByte()), CameraStatus.CurrentScanState.COMPLETED)
+                Pair(byteArrayOf(0), CameraStatus.CurrentScanState.NEVER_STARTED),
+                Pair(byteArrayOf(1), CameraStatus.CurrentScanState.STARTED),
+                Pair(byteArrayOf(2), CameraStatus.CurrentScanState.ABORTED),
+                Pair(byteArrayOf(3), CameraStatus.CurrentScanState.CANCELED),
+                Pair(byteArrayOf(4), CameraStatus.CurrentScanState.COMPLETED)
             )
         }
     }
@@ -31,7 +30,7 @@ class CameraStatusStateScanWifiTest(
         val expected = data.second
 
         val mockData = mapOf(
-            CameraStatus.CameraStatusIds.STATE_SCAN_WIFI.id.toUByte() to bytes
+            CameraStatus.CameraStatusIds.STATE_SCAN_WIFI.id.toByte() to bytes
         )
         val result = CameraStatus.decodeStatus(mockData)
         assertEquals(expected.toString(), result[CameraStatus.CameraStatusIds.STATE_SCAN_WIFI.name])

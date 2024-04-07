@@ -9,7 +9,7 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 class MapFrameRateTest(
-    private val pair: Pair<UByte, FrameRate>
+    private val pair: Pair<Byte, FrameRate>
 ) {
     @Test
     fun `mapFrameRate should map UByte to FrameRate`() {
@@ -22,17 +22,17 @@ class MapFrameRateTest(
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{index}: Test with data={0}, expected={1}")
-        fun data(): List<Pair<UByte, FrameRate>> {
+        fun data(): List<Pair<Byte, FrameRate>> {
             return listOf(
-                Pair((GoProBleCommands.SetFrameRate240.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_240),
-                Pair((GoProBleCommands.SetFrameRate200.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_200),
-                Pair((GoProBleCommands.SetFrameRate120.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_120),
-                Pair((GoProBleCommands.SetFrameRate100.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_100),
-                Pair((GoProBleCommands.SetFrameRate60.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_60),
-                Pair((GoProBleCommands.SetFrameRate50.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_50),
-                Pair((GoProBleCommands.SetFrameRate30.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_30),
-                Pair((GoProBleCommands.SetFrameRate25.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_25),
-                Pair((GoProBleCommands.SetFrameRate24.byteArray.last()).toUByte(), FrameRate.FRAME_RATE_24)
+                Pair((GoProBleCommands.SetFrameRate240.byteArray.last()), FrameRate.FRAME_RATE_240),
+                Pair((GoProBleCommands.SetFrameRate200.byteArray.last()), FrameRate.FRAME_RATE_200),
+                Pair((GoProBleCommands.SetFrameRate120.byteArray.last()), FrameRate.FRAME_RATE_120),
+                Pair((GoProBleCommands.SetFrameRate100.byteArray.last()), FrameRate.FRAME_RATE_100),
+                Pair((GoProBleCommands.SetFrameRate60.byteArray.last()), FrameRate.FRAME_RATE_60),
+                Pair((GoProBleCommands.SetFrameRate50.byteArray.last()), FrameRate.FRAME_RATE_50),
+                Pair((GoProBleCommands.SetFrameRate30.byteArray.last()), FrameRate.FRAME_RATE_30),
+                Pair((GoProBleCommands.SetFrameRate25.byteArray.last()), FrameRate.FRAME_RATE_25),
+                Pair((GoProBleCommands.SetFrameRate24.byteArray.last()), FrameRate.FRAME_RATE_24)
             )
         }
     }

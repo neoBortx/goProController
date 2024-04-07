@@ -42,7 +42,7 @@ class CameraStatusIntTest(
     @Test
     fun testIntegerStatusDecoding() {
         val mockData = mapOf(
-            statusId.id.toUByte() to ByteBuffer.allocate(4).putInt(expectedValue).array().toUByteArray()
+            statusId.id.toByte() to ByteBuffer.allocate(4).putInt(expectedValue).array()
         )
         val result = CameraStatus.decodeStatus(mockData)
         assertEquals(expectedValue.toString(), result[statusId.name])

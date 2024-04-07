@@ -11,7 +11,7 @@ import com.bortxapps.goprocontrollerandroid.domain.data.Speed
 import com.bortxapps.goprocontrollerandroid.feature.commands.api.CommandsApi
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.CameraStatus
 import com.bortxapps.goprocontrollerandroid.feature.commands.decoder.decodeMessageAsMap
-import com.bortxapps.simplebleclient.data.BleNetworkMessage
+import com.bortxapps.simplebleclient.api.data.BleNetworkMessage
 
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -20,20 +20,21 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import java.util.UUID
 
-@OptIn(ExperimentalUnsignedTypes::class)
 class GoProCommandsImplTest {
 
     private lateinit var goProCommandsImpl: GoProCommandsImpl
     private val mockedContext = mockk<Context>(relaxed = true)
     private val mockedApi = mockk<CommandsApi>(relaxed = true)
     private val decodedResponseString = "response from API"
-    private val decodedBytesSuccess = ubyteArrayOf(0x01U, 0x00U)
-    private val decodedBytesError = ubyteArrayOf(0x51U, 0xABU)
+    private val decodedBytesSuccess = byteArrayOf(0x01, 0x00)
+    private val decodedBytesError = byteArrayOf(0x51, 0xAB.toByte())
+    private val characteristicId = UUID.randomUUID()
 
-    private val responseString = BleNetworkMessage(1, 4, decodedResponseString.toByteArray(Charsets.UTF_8).toUByteArray())
-    private val responseBytesSuccess = BleNetworkMessage(1, 4, decodedBytesSuccess)
-    private val responseBytesError = BleNetworkMessage(1, 4, decodedBytesError)
+    private val responseString = BleNetworkMessage(characteristicId,  decodedResponseString.toByteArray(Charsets.UTF_8))
+    private val responseBytesSuccess = BleNetworkMessage(characteristicId,  decodedBytesSuccess)
+    private val responseBytesError = BleNetworkMessage(characteristicId, decodedBytesError)
 
     @Before
     fun setUp() {
@@ -224,7 +225,7 @@ class GoProCommandsImplTest {
     //region getOpenGoProVersion
     @Test
     fun testGetOpenGoProVersion_success() = runTest {
-        val responseVersion = BleNetworkMessage(1, 4, ubyteArrayOf(0x09U, 0x02U))
+        val responseVersion = BleNetworkMessage(characteristicId, byteArrayOf(0x09, 0x02))
         coEvery { mockedApi.getOpenGoProVersion() } returns responseVersion
         assertEquals("9.2", goProCommandsImpl.getOpenGoProVersion().getOrNull())
     }
@@ -233,7 +234,7 @@ class GoProCommandsImplTest {
     //region getResolution
     @Test
     fun testGetResolution_success() = runTest {
-        val responseResolution = BleNetworkMessage(1, 4, ubyteArrayOf(3u, 2u, 1u, 100u))
+        val responseResolution = BleNetworkMessage(characteristicId, byteArrayOf(3, 2, 1, 100))
         coEvery { mockedApi.getResolution() } returns responseResolution
         assertEquals(Resolution.RESOLUTION_5_3K, goProCommandsImpl.getResolution().getOrNull())
     }
@@ -251,7 +252,7 @@ class GoProCommandsImplTest {
     //region getFrameRate
     @Test
     fun testGetFrameRate_success() = runTest {
-        val responseFrameRate = BleNetworkMessage(1, 4, ubyteArrayOf(3u, 3u, 1u, 0u))
+        val responseFrameRate = BleNetworkMessage(characteristicId, byteArrayOf(3, 3, 1, 0))
         coEvery { mockedApi.getFrameRate() } returns responseFrameRate
         assertEquals(FrameRate.FRAME_RATE_240, goProCommandsImpl.getFrameRate().getOrNull())
     }
@@ -269,7 +270,7 @@ class GoProCommandsImplTest {
     //region getHyperSmooth
     @Test
     fun testGetHyperSmooth_success() = runTest {
-        val responseHyperSmooth = BleNetworkMessage(1, 4, ubyteArrayOf(3u, 0x87.toByte().toUByte(), 1u, 0u))
+        val responseHyperSmooth = BleNetworkMessage(characteristicId, byteArrayOf(3, 0x87.toByte(), 1, 0))
         coEvery { mockedApi.getHyperSmooth() } returns responseHyperSmooth
         assertEquals(HyperSmooth.OFF, goProCommandsImpl.getHyperSmooth().getOrNull())
     }
@@ -287,7 +288,7 @@ class GoProCommandsImplTest {
     //region getSpeed
     @Test
     fun testGetSpeed_success() = runTest {
-        val responseSpeed = BleNetworkMessage(1, 4, ubyteArrayOf(3u, 0xB0.toByte().toUByte(), 1u, 3u))
+        val responseSpeed = BleNetworkMessage(characteristicId, byteArrayOf(3, 0xB0.toByte(), 1, 3))
         coEvery { mockedApi.getSpeed() } returns responseSpeed
         assertEquals(Speed.REGULAR_1X, goProCommandsImpl.getSpeed().getOrNull())
     }
@@ -306,7 +307,7 @@ class GoProCommandsImplTest {
     //region getPresets
     @Test
     fun testGetPresets_success() = runTest {
-        val responsePresets = BleNetworkMessage(1, 4, ubyteArrayOf(4u, 62u, 2u, 3u, 0xE8.toByte().toUByte()))
+        val responsePresets = BleNetworkMessage(characteristicId, byteArrayOf(4, 62, 2, 3, 0xE8.toByte()))
         coEvery { mockedApi.getPresets() } returns responsePresets
         assertEquals(Presets.VIDEO, goProCommandsImpl.getPresets().getOrNull())
     }
@@ -324,9 +325,9 @@ class GoProCommandsImplTest {
     //region getCameraStatus
     @Test
     fun testGetCameraStatus_success() = runTest {
-        val ubyte: UByte = 0x01U
-        val responseCameraStatus = BleNetworkMessage(1, 4, ubyteArrayOf(4u))
-        val map = mapOf(ubyte to ubyteArrayOf(0x01U))
+        val ubyte: Byte = 0x01
+        val responseCameraStatus = BleNetworkMessage(characteristicId, byteArrayOf(4))
+        val map = mapOf(ubyte to byteArrayOf(0x01))
         val result = mapOf("INTERNAL_BATTERY_PRESENT" to "true")
 
         coEvery { mockedApi.getCameraStatus() } returns responseCameraStatus

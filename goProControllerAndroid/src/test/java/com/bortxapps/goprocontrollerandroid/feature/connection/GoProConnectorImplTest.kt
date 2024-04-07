@@ -1,7 +1,6 @@
 package com.bortxapps.goprocontrollerandroid.feature.connection
 
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothProfile
 import android.content.Context
 import app.cash.turbine.test
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProBleConnectionStatus
@@ -11,6 +10,7 @@ import com.bortxapps.goprocontrollerandroid.feature.commands.data.GOPRO_NAME_PRE
 import com.bortxapps.goprocontrollerandroid.feature.commands.data.GoProUUID
 import com.bortxapps.goprocontrollerandroid.feature.connection.api.ConnectionApi
 import com.bortxapps.goprocontrollerandroid.feature.connection.mapper.toMapCamera
+import com.bortxapps.simplebleclient.api.data.BleConnectionStatus
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -87,20 +87,20 @@ class GoProConnectorImplTest {
     @Test
     fun `subscribeToBleConnectionStatusChanges transforms and emits correct values`() = runTest {
 
-        val mockStatusFlow = MutableStateFlow(BluetoothProfile.STATE_DISCONNECTED)
+        val mockStatusFlow = MutableStateFlow(BleConnectionStatus.DISCONNECTED)
 
         every { api.subscribeToConnectionStatusChanges() } returns mockStatusFlow
 
         connector.subscribeToBleConnectionStatusChanges().test {
             assertEquals(GoProBleConnectionStatus.STATE_DISCONNECTED, awaitItem())
 
-            mockStatusFlow.value = BluetoothProfile.STATE_CONNECTING
+            mockStatusFlow.value = BleConnectionStatus.CONNECTING
             assertEquals(GoProBleConnectionStatus.STATE_CONNECTING, awaitItem())
 
-            mockStatusFlow.value = BluetoothProfile.STATE_CONNECTED
+            mockStatusFlow.value = BleConnectionStatus.CONNECTED
             assertEquals(GoProBleConnectionStatus.STATE_CONNECTED, awaitItem())
 
-            mockStatusFlow.value = BluetoothProfile.STATE_DISCONNECTING
+            mockStatusFlow.value = BleConnectionStatus.DISCONNECTING
             assertEquals(GoProBleConnectionStatus.STATE_DISCONNECTING, awaitItem())
         }
     }

@@ -1,7 +1,7 @@
 package com.bortxapps.goprocontrollerandroid.feature.connection.mapper
 
-import android.bluetooth.BluetoothProfile
 import com.bortxapps.goprocontrollerandroid.domain.data.GoProBleConnectionStatus
+import com.bortxapps.simplebleclient.api.data.BleConnectionStatus
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -9,7 +9,7 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 class GoProBleConnectionStateMapperTest(
-    private val inputState: Int,
+    private val inputState: BleConnectionStatus,
     private val expectedOutput: GoProBleConnectionStatus
 ) {
 
@@ -18,11 +18,11 @@ class GoProBleConnectionStateMapperTest(
         @Parameterized.Parameters(name = "{index}: Test with inputState={0}, expectedOutput={1}")
         fun data(): Collection<Array<Any>> {
             return listOf(
-                arrayOf(BluetoothProfile.STATE_DISCONNECTED, GoProBleConnectionStatus.STATE_DISCONNECTED),
-                arrayOf(BluetoothProfile.STATE_CONNECTING, GoProBleConnectionStatus.STATE_CONNECTING),
-                arrayOf(BluetoothProfile.STATE_CONNECTED, GoProBleConnectionStatus.STATE_CONNECTED),
-                arrayOf(BluetoothProfile.STATE_DISCONNECTING, GoProBleConnectionStatus.STATE_DISCONNECTING),
-                arrayOf(-1, GoProBleConnectionStatus.UNKNOWN) // Testing an unknown state
+                arrayOf(BleConnectionStatus.DISCONNECTED, GoProBleConnectionStatus.STATE_DISCONNECTED),
+                arrayOf(BleConnectionStatus.CONNECTING, GoProBleConnectionStatus.STATE_CONNECTING),
+                arrayOf(BleConnectionStatus.CONNECTED, GoProBleConnectionStatus.STATE_CONNECTED),
+                arrayOf(BleConnectionStatus.DISCONNECTING, GoProBleConnectionStatus.STATE_DISCONNECTING),
+                arrayOf(BleConnectionStatus.UNKNOWN, GoProBleConnectionStatus.UNKNOWN)
             )
         }
     }
